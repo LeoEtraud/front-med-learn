@@ -1,0 +1,22 @@
+packages:
+  "axios": "API client for handling authentication interceptors reliably"
+  "react-hook-form": "Robust form state management and validation"
+  "@hookform/resolvers": "Zod integration for form validation"
+  "framer-motion": "Smooth page transitions and micro-interactions"
+  "recharts": "Beautiful data visualization for teacher analytics dashboards"
+  "date-fns": "Date formatting and manipulation"
+  "clsx": "Utility for constructing className strings conditionally"
+  "tailwind-merge": "Utility to merge Tailwind CSS classes without style conflicts"
+  "lucide-react": "Beautiful consistent icons"
+
+images:
+  - path: "front/public/images/hero-bg.png"
+    description: "Abstract premium medical technology background, dark navy blue with glowing cyan and white geometric patterns, 3d render, hyperrealistic, shallow depth of field, sophisticated E-learning concept"
+    aspect_ratio: "16:9"
+  - path: "front/public/images/doctor-abstract.png"
+    description: "Abstract stylized illustration of a modern doctor or medical student learning, clean premium corporate SaaS style, predominantly navy blue and teal, solid clean background"
+    aspect_ratio: "1:1"
+
+notes:
+  - "Custom axios instance created to manage Authorization Bearer tokens explicitly."
+  - "Types are redefined locally in src/types to guarantee build stability without depending on workspace monorepo link state."
