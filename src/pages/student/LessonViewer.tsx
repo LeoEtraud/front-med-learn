@@ -7,6 +7,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { ChevronLeft, CheckCircle2, PlayCircle, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { resolveApiUrl } from '@/lib/axios';
 
 // FUNÇÃO PARA CONVERTAR O URL DO VÍDEO DO YOUTUBE PARA O EMBED
 function toYoutubeEmbed(url: string): string | null {
@@ -41,11 +42,12 @@ function LessonVideoPanel({ lesson }: { lesson: LessonWithProgress }) {
   }
 
   if (lesson.videoPlaybackUrl) {
+    const playbackSrc = resolveApiUrl(lesson.videoPlaybackUrl);
     return (
       <div className="relative aspect-video w-full shrink-0 bg-black">
         <video
-          key={lesson.videoPlaybackUrl}
-          src={lesson.videoPlaybackUrl}
+          key={playbackSrc}
+          src={playbackSrc}
           controls
           playsInline
           preload="metadata"

@@ -12,6 +12,18 @@ function getApiBaseUrl(): string {
   return '/api';
 }
 
+/**
+ * Converte caminhos `/api/...` em URL absoluta do backend em produção.
+ * Necessário para `<video src>`, `<img>` etc., que não usam o axios.
+ */
+export function resolveApiUrl(path: string): string {
+  if (path.startsWith('http://') || path.startsWith('https://')) return path;
+  if (import.meta.env.DEV) return path;
+  const origin = import.meta.env.VITE_API_ORIGIN?.trim().replace(/\/$/, '');
+  if (origin) return `${origin}${path.startsWith('/') ? path : `/${path}`}`;
+  return path;
+}
+
 // Create a custom axios instance to reliably inject the token
 export const api = axios.create({
   baseURL: getApiBaseUrl(),
