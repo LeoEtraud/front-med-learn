@@ -50,6 +50,10 @@ function LessonVideoPanel({ lesson }: { lesson: LessonWithProgress }) {
           playsInline
           preload="metadata"
           className="absolute inset-0 h-full w-full object-contain"
+          onError={(e) => {
+            const err = (e.currentTarget as HTMLVideoElement).error;
+            console.error("Vídeo (playback): erro de mídia", err?.code, err?.message);
+          }}
         >
           Seu navegador não suporta reprodução deste vídeo.
         </video>
