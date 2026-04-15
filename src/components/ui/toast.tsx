@@ -27,7 +27,11 @@ const toastVariants = cva(
   {
     variants: {
       variant: {
-        default: "border bg-background text-foreground",
+        default: "group border bg-background text-foreground",
+        success:
+          "success group border-emerald-700 bg-emerald-600 text-white shadow-emerald-900/35 dark:border-emerald-500 dark:bg-emerald-500 dark:text-emerald-950 dark:shadow-emerald-950/30",
+        warning:
+          "warning group border-amber-700 bg-amber-500 text-amber-950 shadow-amber-900/30 dark:border-amber-500 dark:bg-amber-500 dark:text-amber-950 dark:shadow-amber-950/25",
         destructive:
           "destructive group border-destructive bg-destructive text-destructive-foreground",
       },
@@ -75,7 +79,7 @@ const ToastClose = React.forwardRef<
   <ToastPrimitives.Close
     ref={ref}
     className={cn(
-      "absolute right-2 top-2 rounded-md p-1 text-foreground/50 opacity-0 transition-opacity hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100 group-[.destructive]:text-red-300 group-[.destructive]:hover:text-red-50 group-[.destructive]:focus:ring-red-400 group-[.destructive]:focus:ring-offset-red-600",
+      "absolute right-2 top-2 rounded-md p-1 text-foreground/50 opacity-0 transition-opacity hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100 group-[.success]:text-white/80 group-[.success]:hover:text-white group-[.success]:focus:ring-emerald-100/60 dark:group-[.success]:text-emerald-900/75 dark:group-[.success]:hover:text-emerald-950 group-[.warning]:text-amber-900/70 group-[.warning]:hover:text-amber-950 group-[.warning]:focus:ring-amber-100/70 group-[.destructive]:text-red-300 group-[.destructive]:hover:text-red-50 group-[.destructive]:focus:ring-red-400 group-[.destructive]:focus:ring-offset-red-600",
       className
     )}
     toast-close=""
@@ -104,7 +108,7 @@ const ToastDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ToastPrimitives.Description
     ref={ref}
-    className={cn("text-sm opacity-90", className)}
+    className={cn("text-sm opacity-95", className)}
     {...props}
   />
 ))

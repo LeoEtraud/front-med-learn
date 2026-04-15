@@ -6,14 +6,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { PageLoading } from '@/components/ui/page-loading';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
+
+const specialties = ['Cardiologia', 'Neurologia', 'Pediatria', 'Cirurgia', 'Clínica Médica'];
 
 export default function CourseCatalog() {
   const [search, setSearch] = useState('');
   const [specialty, setSpecialty] = useState('');
-  
-  const { data, isLoading } = usePublicCourses({ search, specialty });
+  const debouncedSearch = useDebouncedValue(search.trim(), 350);
 
-  const specialties = ['Cardiologia', 'Neurologia', 'Pediatria', 'Cirurgia', 'Clínica Médica'];
+  const { data, isLoading } = usePublicCourses({ search: debouncedSearch, specialty });
 
   return (
     <div className="min-h-dvh overflow-x-hidden bg-slate-50">
@@ -48,11 +51,7 @@ export default function CourseCatalog() {
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {[1,2,3,4,5,6].map(i => (
-              <div key={i} className="h-80 bg-slate-200 rounded-xl animate-pulse"></div>
-            ))}
-          </div>
+          <PageLoading message="Carregando cursos..." />
         ) : data?.courses.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-xl border border-dashed">
             <GraduationCap className="w-16 h-16 text-slate-300 mx-auto mb-4" />
@@ -65,7 +64,13 @@ export default function CourseCatalog() {
               <Card key={course.id} className="card-hover flex flex-col group">
                 <div className="aspect-video bg-slate-100 relative overflow-hidden">
                   {course.coverImageUrl ? (
-                    <img src={course.coverImageUrl} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <img
+                      src={course.coverImageUrl}
+                      alt={course.title}
+                      loading="lazy"
+                      decoding="async"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-primary/5">
                       <BookOpen className="w-12 h-12 text-primary/30" />

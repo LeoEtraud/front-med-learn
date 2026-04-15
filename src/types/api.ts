@@ -10,6 +10,8 @@ export interface UserProfile {
   avatarUrl?: string | null;
   bio?: string | null;
   specialty?: string | null;
+  phone?: string | null;
+  cpf?: string | null;
   createdAt: string;
 }
 

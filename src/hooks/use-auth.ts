@@ -14,7 +14,7 @@ export function useAuth() {
       const token = localStorage.getItem('medlearn_token');
       if (!token) return null;
       try {
-        const res = await api.get<{id: string, name: string, email: string, role: string, avatarUrl: string}>('/auth/me');
+        const res = await api.get<UserProfile>('/auth/me');
         return res.data as UserProfile;
       } catch (err) {
         return null;

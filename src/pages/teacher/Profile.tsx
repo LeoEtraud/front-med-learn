@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from 'react';
+import { KeyRound } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { PasswordInput } from '@/components/ui/password-input';
 import { Button } from '@/components/ui/button';
+import { PageLoading } from '@/components/ui/page-loading';
+import { ProfileAccessSection } from '@/components/profile/ProfileAccessSection';
 import { useToast } from '@/hooks/use-toast';
 import {
   useTeacherProfile,
   useUpdateTeacherPassword,
   useUpdateTeacherProfile,
 } from '@/hooks/use-teacher';
+import { formatCpf, formatPhoneBR, isValidCpf, isValidPhoneBR } from '@/lib/profile-formatters';
+import { MEDICAL_SPECIALTIES } from '@/lib/medical-specialties';
 
 export default function TeacherProfile() {
   const { toast } = useToast();
@@ -21,7 +24,11 @@ export default function TeacherProfile() {
   const [name, setName] = useState('');
   const [bio, setBio] = useState('');
   const [specialty, setSpecialty] = useState('');
+  const [phone, setPhone] = useState('');
+  const [cpf, setCpf] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
+  const [legacySpecialty, setLegacySpecialty] = useState<string | null>(null);
+  const [formErrors, setFormErrors] = useState<Partial<Record<'name' | 'phone' | 'cpf' | 'specialty', string>>>({});
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -29,16 +36,48 @@ export default function TeacherProfile() {
 
   useEffect(() => {
     if (!profile) return;
+    const normalizedSpecialty = profile.specialty?.trim() ?? '';
+    const hasKnownSpecialty = normalizedSpecialty && MEDICAL_SPECIALTIES.includes(normalizedSpecialty as (typeof MEDICAL_SPECIALTIES)[number]);
     setName(profile.name ?? '');
     setBio(profile.bio ?? '');
-    setSpecialty(profile.specialty ?? '');
+    setSpecialty(hasKnownSpecialty ? normalizedSpecialty : '');
+    setLegacySpecialty(!hasKnownSpecialty && normalizedSpecialty ? normalizedSpecialty : null);
+    setPhone(formatPhoneBR(profile.phone ?? ''));
+    setCpf(formatCpf(profile.cpf ?? ''));
     setAvatarUrl(profile.avatarUrl ?? '');
   }, [profile]);
 
+  const onProfileValueChange = (field: 'name' | 'bio' | 'specialty' | 'phone' | 'cpf' | 'avatarUrl', value: string) => {
+    if (field === 'phone') {
+      setPhone(formatPhoneBR(value));
+    } else if (field === 'cpf') {
+      setCpf(formatCpf(value));
+    } else if (field === 'name') {
+      setName(value);
+    } else if (field === 'bio') {
+      setBio(value);
+    } else if (field === 'specialty') {
+      setSpecialty(value);
+      setLegacySpecialty(null);
+    } else {
+      setAvatarUrl(value);
+    }
+    setFormErrors((prev) => ({ ...prev, [field]: undefined }));
+  };
+
   const onSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) {
-      toast({ variant: 'destructive', title: 'Nome é obrigatório' });
+    const nextErrors: Partial<Record<'name' | 'phone' | 'cpf' | 'specialty', string>> = {};
+    if (!name.trim()) nextErrors.name = 'Nome completo é obrigatório.';
+    if (!isValidPhoneBR(phone)) nextErrors.phone = 'Informe um telefone válido com DDD.';
+    if (!isValidCpf(cpf)) nextErrors.cpf = 'CPF inválido.';
+    if (specialty && !MEDICAL_SPECIALTIES.includes(specialty as (typeof MEDICAL_SPECIALTIES)[number])) {
+      nextErrors.specialty = 'Selecione uma especialidade válida na lista.';
+    }
+
+    if (Object.keys(nextErrors).length > 0) {
+      setFormErrors(nextErrors);
+      toast({ variant: 'destructive', title: 'Revise os campos destacados.' });
       return;
     }
 
@@ -46,10 +85,13 @@ export default function TeacherProfile() {
       await updateProfile.mutateAsync({
         name: name.trim(),
         bio: bio.trim() || '',
-        specialty: specialty.trim() || '',
-        avatarUrl: avatarUrl.trim() || '',
+        specialty: specialty || '',
+        phone: phone.trim() || '',
+        cpf: cpf.trim() || '',
+        avatarUrl: avatarUrl || '',
       });
-      toast({ title: 'Perfil atualizado com sucesso' });
+      setLegacySpecialty(null);
+      toast({ variant: 'success', title: 'Perfil atualizado com sucesso' });
     } catch (error: any) {
       toast({
         variant: 'destructive',
@@ -80,7 +122,7 @@ export default function TeacherProfile() {
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
-      toast({ title: 'Senha alterada com sucesso' });
+      toast({ variant: 'success', title: 'Senha alterada com sucesso' });
     } catch (error: any) {
       toast({
         variant: 'destructive',
@@ -90,54 +132,27 @@ export default function TeacherProfile() {
     }
   };
 
-  if (isLoading) return <AppLayout><div className="p-10">Carregando perfil...</div></AppLayout>;
+  if (isLoading) return <AppLayout><PageLoading message="Carregando perfil..." /></AppLayout>;
   if (!profile) return <AppLayout><div>Não foi possível carregar o perfil.</div></AppLayout>;
 
   return (
     <AppLayout>
-      <div className="mx-auto max-w-4xl min-w-0 space-y-6">
+      <div className="mx-auto max-w-[92rem] min-w-0 space-y-6">
         <div>
           <p className="mb-1 text-sm font-bold uppercase tracking-wider text-muted-foreground">Professor</p>
           <h1 className="font-display text-2xl font-bold sm:text-3xl">Meu Perfil</h1>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Dados pessoais</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={onSaveProfile} className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Nome</label>
-                  <Input value={name} onChange={(e) => setName(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">E-mail</label>
-                  <Input value={profile.email} disabled />
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Especialidade</label>
-                  <Input value={specialty} onChange={(e) => setSpecialty(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Avatar URL</label>
-                  <Input value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} placeholder="https://..." />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Bio</label>
-                <Textarea value={bio} onChange={(e) => setBio(e.target.value)} className="min-h-28 resize-y" />
-              </div>
-
-              <Button type="submit" isLoading={updateProfile.isPending}>Salvar dados</Button>
-            </form>
-          </CardContent>
-        </Card>
+        <ProfileAccessSection
+          values={{ name, bio, specialty, phone, cpf, avatarUrl }}
+          email={profile.email}
+          displayName={name || profile.name}
+          errors={formErrors}
+          legacySpecialty={legacySpecialty}
+          isSaving={updateProfile.isPending}
+          onSubmit={onSaveProfile}
+          onValueChange={onProfileValueChange}
+        />
 
         <Card>
           <CardHeader>
@@ -160,7 +175,12 @@ export default function TeacherProfile() {
                 </div>
               </div>
 
-              <Button type="submit" variant="outline" isLoading={updatePassword.isPending}>
+              <Button
+                type="submit"
+                isLoading={updatePassword.isPending}
+                className="bg-green-600 text-white hover:bg-green-700"
+              >
+                <KeyRound className="mr-2 h-4 w-4" />
                 Alterar senha
               </Button>
             </form>

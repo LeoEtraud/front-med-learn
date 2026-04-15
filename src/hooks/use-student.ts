@@ -48,6 +48,8 @@ export function useStudentLesson(lessonId: string) {
       return res.data;
     },
     enabled: !!lessonId,
+    // Mantém a aula anterior na tela durante a troca para evitar "piscar" o layout.
+    placeholderData: (previousData) => previousData,
   });
 }
 
@@ -81,7 +83,14 @@ export function useStudentProfile() {
 export function useUpdateStudentProfile() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (data: { name: string; bio?: string; specialty?: string; avatarUrl?: string }) => {
+    mutationFn: async (data: {
+      name: string;
+      bio?: string;
+      specialty?: string;
+      phone?: string;
+      cpf?: string;
+      avatarUrl?: string;
+    }) => {
       const res = await api.put('/student/profile', data);
       return res.data;
     },

@@ -46,7 +46,9 @@ export default function Login() {
         </div>
         <div className="relative z-10 max-w-md text-center">
           <Stethoscope className="w-16 h-16 mx-auto mb-8 text-primary" />
-          <h2 className="text-4xl font-display font-bold mb-4">Bem-vindo de volta ao MedLearn</h2>
+          <h2 className="mb-4 font-display text-4xl font-bold text-white">
+            Bem-vindo de volta ao MedLearn
+          </h2>
           <p className="text-lg text-slate-300">Acesse seus cursos, continue seu aprendizado e expanda seus conhecimentos médicos.</p>
         </div>
       </div>

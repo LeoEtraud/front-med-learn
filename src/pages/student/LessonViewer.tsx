@@ -4,8 +4,9 @@ import { useStudentLesson, useMarkLessonProgress } from '@/hooks/use-student';
 import { usePublicCourse } from '@/hooks/use-courses';
 import type { LessonWithProgress } from '@/types/api';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { ChevronLeft, CheckCircle2, PlayCircle, FileText } from 'lucide-react';
+import { ChevronLeft, CheckCircle2, PlayCircle, FileText, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { PageLoading } from '@/components/ui/page-loading';
 import { useToast } from '@/hooks/use-toast';
 import { resolveApiUrl } from '@/lib/axios';
 
@@ -30,10 +31,20 @@ function toYoutubeEmbed(url: string): string | null {
 }
 
 // FUNÇÃO PARA MOSTRAR O VÍDEO DA AULA
-function LessonVideoPanel({ lesson }: { lesson: LessonWithProgress }) {
+function LessonVideoPanel({ lesson, loading }: { lesson: LessonWithProgress; loading?: boolean }) {
+  if (loading) {
+    return (
+      <div className="relative aspect-video w-full shrink-0 border-b bg-black/85">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Loader2 className="h-10 w-10 animate-spin text-white/80" />
+        </div>
+      </div>
+    );
+  }
+
   const placeholder = (
-    <div className="relative aspect-video w-full shrink-0 bg-slate-100 flex items-center justify-center border-b">
-      <FileText className="w-16 h-16 text-slate-300" />
+    <div className="relative flex aspect-video w-full shrink-0 items-center justify-center border-b border-border bg-muted">
+      <FileText className="h-16 w-16 text-muted-foreground/50" />
     </div>
   );
 
@@ -102,60 +113,67 @@ export default function LessonViewer() {
     actualLessonId = course.modules[0].lessons[0].id;
   }
 
-  const { data: lesson, isLoading } = useStudentLesson(actualLessonId);
+  const { data: lesson, isLoading, isFetching, isPlaceholderData } = useStudentLesson(actualLessonId);
   const markProgress = useMarkLessonProgress();
   const { toast } = useToast();
 
   const handleComplete = async () => {
     try {
       await markProgress.mutateAsync({ lessonId: actualLessonId, isCompleted: !lesson?.isCompleted });
-      toast({ title: lesson?.isCompleted ? "Marcado como não concluído" : "Aula concluída!" });
+      toast(
+        lesson?.isCompleted
+          ? { variant: "warning", title: "Marcado como não concluído" }
+          : { variant: "success", title: "Aula concluída!" },
+      );
     } catch(e) {
       toast({ variant: "destructive", title: "Erro ao salvar progresso" });
     }
   };
 
-  if (isLoading || !course) return <AppLayout><div className="p-20 text-center">Carregando aula...</div></AppLayout>;
+  if (!course) return <AppLayout><PageLoading message="Carregando curso..." /></AppLayout>;
+  if (isLoading) return <AppLayout><PageLoading message="Carregando aula..." /></AppLayout>;
   if (!lesson) return <AppLayout><div className="p-20 text-center">Aula não encontrada.</div></AppLayout>;
+  const isLessonSwitching = isFetching && (isPlaceholderData || lesson.id !== actualLessonId);
 
   return (
     <AppLayout>
       <div className="flex w-full min-w-0 flex-col gap-4 lg:min-h-[min(100%,calc(100dvh-5rem))] lg:flex-row lg:gap-6">
         {/* Conteúdo principal: primeiro no mobile (vídeo + texto) */}
-        <div className="order-1 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-xl border bg-white lg:order-2 lg:min-h-[min(100%,calc(100dvh-5rem))]">
+        <div className="order-1 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-card text-card-foreground lg:order-2 lg:min-h-[min(100%,calc(100dvh-5rem))]">
           <div className="shrink-0 overflow-hidden rounded-t-xl">
-            <LessonVideoPanel lesson={lesson} />
+            <LessonVideoPanel lesson={lesson} loading={isLessonSwitching} />
           </div>
 
           <div className="min-h-0 flex-1 rounded-b-xl p-4 sm:p-6 md:p-8 lg:overflow-y-auto">
             <div className="mb-5 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-              <div className="min-w-0">
-                <h1 className="mb-1 font-display text-xl font-bold sm:text-2xl">{lesson.title}</h1>
-                <p className="text-sm text-slate-500">Aula de Módulo</p>
+              <div className="min-w-0 text-card-foreground">
+                <h1 className="mb-1 font-display text-xl font-bold text-card-foreground sm:text-2xl">{lesson.title}</h1>
+                <p className="text-sm text-muted-foreground">Aula de Módulo</p>
               </div>
               <Button
                 onClick={handleComplete}
-                variant={lesson.isCompleted ? 'outline' : 'default'}
-                className={`w-full shrink-0 sm:w-auto ${lesson.isCompleted ? 'border-green-200 bg-green-50 text-green-600 hover:bg-green-100' : ''}`}
+                variant="default"
+                className={`w-full shrink-0 sm:w-auto ${lesson.isCompleted ? '!border-emerald-900 !bg-emerald-800 !text-white hover:!bg-emerald-900 hover:!text-white disabled:!opacity-100 dark:!border-emerald-500/35 dark:!bg-emerald-500/15 dark:!text-emerald-300 dark:hover:!bg-emerald-500/20' : ''}`}
                 isLoading={markProgress.isPending}
+                disabled={isLessonSwitching}
               >
                 <CheckCircle2 className="mr-2 h-4 w-4 shrink-0" />
                 {lesson.isCompleted ? 'Concluída' : 'Marcar como Concluída'}
               </Button>
             </div>
 
-            <div className="prose prose-sm max-w-none text-slate-700 sm:prose-base">
+            <div className="prose prose-sm max-w-none text-card-foreground/90 prose-headings:text-card-foreground prose-p:text-card-foreground/90 sm:prose-base dark:prose-invert">
               {lesson.description ? (
                 <p>{lesson.description}</p>
               ) : (
-                <p className="italic text-slate-400">Nenhuma descrição adicional para esta aula.</p>
+                <p className="italic text-muted-foreground">Nenhuma descrição adicional para esta aula.</p>
               )}
             </div>
 
             {lesson.type === 'QUIZ' && lesson.quiz && (
-              <div className="mt-8 rounded-xl border border-blue-100 bg-blue-50 p-4 text-center sm:mt-10 sm:p-6">
-                <h3 className="mb-2 text-lg font-bold text-blue-900 sm:text-xl">{lesson.quiz.title}</h3>
-                <p className="mb-4 text-sm text-blue-700 sm:mb-6 sm:text-base">
+              <div className="mt-8 rounded-xl border border-primary/25 bg-primary/10 p-4 text-center sm:mt-10 sm:p-6">
+                <h3 className="mb-2 text-lg font-bold text-card-foreground sm:text-xl">{lesson.quiz.title}</h3>
+                <p className="mb-4 text-sm text-muted-foreground sm:mb-6 sm:text-base">
                   Avaliação com {lesson.quiz.questions.length} questões. Nota para passar: {lesson.quiz.passingScore}%
                 </p>
                 <Button className="w-full sm:w-auto">Iniciar Avaliação</Button>
@@ -165,19 +183,19 @@ export default function LessonViewer() {
         </div>
 
         {/* Lista de aulas: abaixo no mobile, à esquerda no desktop */}
-        <aside className="order-2 flex max-h-[min(42vh,20rem)] w-full shrink-0 flex-col overflow-hidden rounded-xl border bg-white lg:order-1 lg:max-h-none lg:h-auto lg:max-h-[min(100%,calc(100dvh-5rem))] lg:w-80">
-          <div className="shrink-0 border-b bg-slate-50 p-3 sm:p-4">
+        <aside className="order-2 flex max-h-[min(42vh,20rem)] w-full shrink-0 flex-col overflow-hidden rounded-xl border border-border bg-card lg:order-1 lg:max-h-none lg:h-auto lg:max-h-[min(100%,calc(100dvh-5rem))] lg:w-80">
+          <div className="shrink-0 border-b border-border bg-muted/50 p-3 sm:p-4">
             <Link href="/student/courses">
               <Button variant="ghost" size="sm" className="-ml-2 mb-1 text-muted-foreground sm:mb-2">
                 <ChevronLeft className="mr-1 h-4 w-4" aria-hidden /> Voltar
               </Button>
             </Link>
-            <h3 className="line-clamp-2 font-display text-sm font-bold sm:text-base">{course.title}</h3>
+            <h3 className="line-clamp-2 font-display text-sm font-bold text-foreground sm:text-base">{course.title}</h3>
           </div>
           <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-y-contain p-2 sm:space-y-4">
             {course.modules?.map((mod, i) => (
               <div key={mod.id}>
-                <div className="px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 sm:px-3 sm:py-2 sm:text-xs">
+                <div className="px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground sm:px-3 sm:py-2 sm:text-xs">
                   Módulo {i + 1}
                 </div>
                 <div className="space-y-0.5 sm:space-y-1">
@@ -185,7 +203,7 @@ export default function LessonViewer() {
                     <Link key={l.id} href={`/student/courses/${course.id}/lessons/${l.id}`}>
                       <button
                         type="button"
-                        className={`flex w-full min-h-11 items-start gap-2 rounded-lg px-2 py-2 text-left text-sm transition-colors touch-manipulation sm:gap-3 sm:px-3 sm:py-2.5 ${l.id === actualLessonId ? 'bg-primary/10 font-medium text-primary' : 'text-slate-700 hover:bg-slate-100'}`}
+                        className={`flex w-full min-h-11 items-start gap-2 rounded-lg px-2 py-2 text-left text-sm transition-colors touch-manipulation sm:gap-3 sm:px-3 sm:py-2.5 ${l.id === actualLessonId ? 'bg-primary/10 font-medium text-primary' : 'text-foreground/90 hover:bg-muted hover:text-foreground'}`}
                       >
                         {l.type === 'VIDEO' ? (
                           <PlayCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />

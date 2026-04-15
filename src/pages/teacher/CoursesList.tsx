@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useTeacherCourses } from '@/hooks/use-teacher';
 import { Link } from 'wouter';
@@ -6,35 +6,32 @@ import { Button } from '@/components/ui/button';
 import { Plus, Edit2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { PageLoading } from '@/components/ui/page-loading';
+import { CreateCourseModal } from '@/components/course-management/create-entity-modals';
 
 // PÁGINA DE LISTA DE CURSOS - PÁGINA PARA LISTAR OS CURSOS DO PROFESSOR
 export default function CoursesList() {
   const { data: courses, isLoading } = useTeacherCourses();
+  const [isCreateCourseOpen, setIsCreateCourseOpen] = useState(false);
 
   return (
     <AppLayout>
-      <div className="mx-auto max-w-6xl min-w-0 space-y-6">
+      <CreateCourseModal open={isCreateCourseOpen} onOpenChange={setIsCreateCourseOpen} />
+      <div className="mx-auto max-w-[92rem] min-w-0 space-y-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h1 className="font-display text-xl font-bold sm:text-2xl">Gerenciar Cursos</h1>
-          <Link href="/teacher/courses/new" className="w-full sm:w-auto">
-            <Button className="w-full sm:w-auto">
-              <Plus className="mr-2 h-4 w-4" /> Novo Curso
-            </Button>
-          </Link>
+          <Button className="w-full sm:w-auto" onClick={() => setIsCreateCourseOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" /> Novo Curso
+          </Button>
         </div>
 
         {isLoading ? (
-          <div className="animate-pulse space-y-4">
-            <div className="h-24 bg-slate-200 rounded-xl"></div>
-            <div className="h-24 bg-slate-200 rounded-xl"></div>
-          </div>
+          <PageLoading message="Carregando cursos..." />
         ) : courses?.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-xl border border-dashed">
             <h3 className="text-xl font-bold mb-2">Você ainda não possui cursos</h3>
             <p className="text-slate-500 mb-6">Comece criando seu primeiro curso para seus alunos.</p>
-            <Link href="/teacher/courses/new">
-              <Button>Criar Meu Primeiro Curso</Button>
-            </Link>
+            <Button onClick={() => setIsCreateCourseOpen(true)}>Criar Meu Primeiro Curso</Button>
           </div>
         ) : (
           <div className="grid gap-4">

@@ -10,6 +10,8 @@ export function usePublicCourses(params?: { specialty?: string; level?: string; 
       const res = await api.get<{courses: Course[], total: number}>('/courses', { params });
       return res.data;
     },
+    // Mantém a lista atual enquanto novos filtros carregam.
+    placeholderData: (previousData) => previousData,
   });
 }
 

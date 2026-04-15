@@ -124,7 +124,14 @@ export function useTeacherProfile() {
 export function useUpdateTeacherProfile() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (data: { name: string; bio?: string; specialty?: string; avatarUrl?: string }) => {
+    mutationFn: async (data: {
+      name: string;
+      bio?: string;
+      specialty?: string;
+      phone?: string;
+      cpf?: string;
+      avatarUrl?: string;
+    }) => {
       const res = await api.put('/teacher/profile', data);
       return res.data;
     },

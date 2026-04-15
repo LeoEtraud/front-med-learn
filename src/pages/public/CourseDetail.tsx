@@ -7,6 +7,7 @@ import { Clock, PlayCircle, ShieldCheck, CheckCircle2, ChevronDown, User } from 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { PageLoading } from '@/components/ui/page-loading';
 import { useToast } from '@/hooks/use-toast';
 
 export default function CourseDetail() {
@@ -23,14 +24,18 @@ export default function CourseDetail() {
     }
     try {
       await enroll.mutateAsync(id);
-      toast({ title: "Inscrição confirmada!", description: "Bem-vindo ao curso." });
+      toast({
+        variant: "success",
+        title: "Inscrição confirmada!",
+        description: "Bem-vindo ao curso.",
+      });
       window.location.href = `/student/courses`;
     } catch (e: any) {
       toast({ variant: "destructive", title: "Erro", description: e.response?.data?.error || "Falha ao se inscrever." });
     }
   };
 
-  if (isLoading) return <div className="p-20 text-center">Carregando...</div>;
+  if (isLoading) return <PageLoading className="min-h-dvh" />;
   if (!course) return <div className="p-20 text-center">Curso não encontrado.</div>;
 
   return (
