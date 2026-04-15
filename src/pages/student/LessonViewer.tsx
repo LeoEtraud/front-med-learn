@@ -6,9 +6,10 @@ import type { LessonWithProgress } from '@/types/api';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { ChevronLeft, CheckCircle2, PlayCircle, FileText, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { PageLoading } from '@/components/ui/page-loading';
 import { useToast } from '@/hooks/use-toast';
 import { resolveApiUrl } from '@/lib/axios';
+import { LessonViewerSkeleton } from '@/components/ui/content-skeletons';
+import { useDelayedFlag } from '@/hooks/use-delayed-flag';
 
 // FUNÇÃO PARA CONVERTAR O URL DO VÍDEO DO YOUTUBE PARA O EMBED
 function toYoutubeEmbed(url: string): string | null {
@@ -114,6 +115,8 @@ export default function LessonViewer() {
   }
 
   const { data: lesson, isLoading, isFetching, isPlaceholderData } = useStudentLesson(actualLessonId);
+  const showCourseLoading = useDelayedFlag(!course);
+  const showLessonLoading = useDelayedFlag(isLoading);
   const markProgress = useMarkLessonProgress();
   const { toast } = useToast();
 
@@ -130,8 +133,14 @@ export default function LessonViewer() {
     }
   };
 
-  if (!course) return <AppLayout><PageLoading message="Carregando curso..." /></AppLayout>;
-  if (isLoading) return <AppLayout><PageLoading message="Carregando aula..." /></AppLayout>;
+  if (!course) {
+    if (!showCourseLoading) return <AppLayout><div className="min-h-24" /></AppLayout>;
+    return <AppLayout><LessonViewerSkeleton /></AppLayout>;
+  }
+  if (isLoading && !lesson) {
+    if (!showLessonLoading) return <AppLayout><div className="min-h-24" /></AppLayout>;
+    return <AppLayout><LessonViewerSkeleton /></AppLayout>;
+  }
   if (!lesson) return <AppLayout><div className="p-20 text-center">Aula não encontrada.</div></AppLayout>;
   const isLessonSwitching = isFetching && (isPlaceholderData || lesson.id !== actualLessonId);
 

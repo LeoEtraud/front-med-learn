@@ -6,7 +6,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PasswordInput } from '@/components/ui/password-input';
 import { Button } from '@/components/ui/button';
-import { PageLoading } from '@/components/ui/page-loading';
+import { ProfileSkeleton } from '@/components/ui/content-skeletons';
 import { ProfileAccessSection } from '@/components/profile/ProfileAccessSection';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -16,6 +16,7 @@ import {
 } from '@/hooks/use-student';
 import { formatCpf, formatPhoneBR, isValidCpf, isValidPhoneBR } from '@/lib/profile-formatters';
 import { MEDICAL_SPECIALTIES } from '@/lib/medical-specialties';
+import { useDelayedFlag } from '@/hooks/use-delayed-flag';
 
 // PÁGINA DE PERFIL DO ALUNO - PÁGINA PARA MOSTRAR O PERFIL DO ALUNO
 export default function StudentProfile() {
@@ -23,6 +24,8 @@ export default function StudentProfile() {
   const { user, isLoading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
   const { data: profile, isLoading } = useStudentProfile();
+  const showAuthLoading = useDelayedFlag(authLoading);
+  const showProfileLoading = useDelayedFlag(isLoading);
 
   // FUNÇÃO PARA VERIFICAR SE O USUÁRIO É UM ALUNO
   useEffect(() => {
@@ -149,10 +152,14 @@ export default function StudentProfile() {
 
   // FUNÇÃO PARA VERIFICAR SE O USUÁRIO É UM ALUNO
   if (authLoading || (user && user.role !== 'STUDENT')) {
-    return <AppLayout><PageLoading /></AppLayout>;
+    if (!showAuthLoading) return null;
+    return <AppLayout><ProfileSkeleton /></AppLayout>;
   }
 
-  if (isLoading) return <AppLayout><PageLoading message="Carregando perfil..." /></AppLayout>;
+  if (isLoading && !profile) {
+    if (!showProfileLoading) return <AppLayout><div className="min-h-24" /></AppLayout>;
+    return <AppLayout><ProfileSkeleton /></AppLayout>;
+  }
   if (!profile) return <AppLayout><div>Não foi possível carregar o perfil.</div></AppLayout>;
 
   return (

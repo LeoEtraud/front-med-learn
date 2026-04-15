@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { PageLoading } from '@/components/ui/page-loading';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import { useDelayedFlag } from '@/hooks/use-delayed-flag';
+import { CourseCardGridSkeleton } from '@/components/ui/content-skeletons';
 
 const specialties = ['Cardiologia', 'Neurologia', 'Pediatria', 'Cirurgia', 'Clínica Médica'];
 
@@ -17,6 +18,7 @@ export default function CourseCatalog() {
   const debouncedSearch = useDebouncedValue(search.trim(), 350);
 
   const { data, isLoading } = usePublicCourses({ search: debouncedSearch, specialty });
+  const showLoading = useDelayedFlag(isLoading);
 
   return (
     <div className="min-h-dvh overflow-x-hidden bg-slate-50">
@@ -50,8 +52,10 @@ export default function CourseCatalog() {
           </select>
         </div>
 
-        {isLoading ? (
-          <PageLoading message="Carregando cursos..." />
+        {isLoading && showLoading ? (
+          <CourseCardGridSkeleton />
+        ) : isLoading ? (
+          <div className="min-h-24" />
         ) : data?.courses.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-xl border border-dashed">
             <GraduationCap className="w-16 h-16 text-slate-300 mx-auto mb-4" />

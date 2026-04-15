@@ -6,13 +6,17 @@ import { BookOpen, Award, Clock, PlayCircle } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
-import { PageLoading } from '@/components/ui/page-loading';
+import { DashboardSkeleton } from '@/components/ui/content-skeletons';
+import { useDelayedFlag } from '@/hooks/use-delayed-flag';
 
 // PÁGINA DE DASHBOARD DO ALUNO - PÁGINA PARA MOSTRAR O DASHBOARD DO ALUNO
 export default function StudentDashboard() {
   const { data, isLoading } = useStudentDashboard();
+  const showLoading = useDelayedFlag(isLoading);
+  const isWaitingData = isLoading && !data;
 
-  if (isLoading) return <AppLayout><PageLoading message="Carregando painel..." /></AppLayout>;
+  if (isWaitingData && showLoading) return <AppLayout><DashboardSkeleton /></AppLayout>;
+  if (isWaitingData) return <AppLayout><div className="min-h-24" /></AppLayout>;
   if (!data) return <AppLayout><div>Erro ao carregar dados.</div></AppLayout>;
 
   return (

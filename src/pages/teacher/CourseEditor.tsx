@@ -22,11 +22,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { PageLoading } from '@/components/ui/page-loading';
+import { CourseEditorSkeleton } from '@/components/ui/content-skeletons';
 import { useForm } from 'react-hook-form';
 import { Plus, Video, FileQuestion, GripVertical, Upload, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { CreateLessonModal, CreateModuleModal } from '@/components/course-management/create-entity-modals';
+import { useDelayedFlag } from '@/hooks/use-delayed-flag';
 
 // FUNÇÃO PARA PARSEAR O ERRO DO S3
 function parseS3ErrorText(raw: string): string | null {
@@ -313,6 +314,7 @@ function LessonEditorRow({ lesson }: { lesson: Lesson }) {
 export default function CourseEditor() {
   const { id } = useParams<{ id: string }>();
   const { data: course, isLoading } = useTeacherCourse(id!);
+  const showLoading = useDelayedFlag(isLoading);
   const updateCourse = useUpdateCourse();
   const { toast } = useToast();
 
@@ -352,7 +354,10 @@ export default function CourseEditor() {
     setIsLessonModalOpen(true);
   };
 
-  if (isLoading) return <AppLayout><PageLoading message="Carregando editor..." /></AppLayout>;
+  if (isLoading && !course) {
+    if (!showLoading) return <AppLayout><div className="min-h-24" /></AppLayout>;
+    return <AppLayout><CourseEditorSkeleton /></AppLayout>;
+  }
   if (!course) return <AppLayout><div>Curso não encontrado</div></AppLayout>;
 
   return (

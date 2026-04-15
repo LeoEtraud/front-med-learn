@@ -3,12 +3,16 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { useTeacherDashboard } from '@/hooks/use-teacher';
 import { Card, CardContent } from '@/components/ui/card';
 import { Users, FileVideo, Activity, Target } from 'lucide-react';
-import { PageLoading } from '@/components/ui/page-loading';
+import { DashboardSkeleton } from '@/components/ui/content-skeletons';
+import { useDelayedFlag } from '@/hooks/use-delayed-flag';
 
 export default function TeacherDashboard() {
   const { data, isLoading } = useTeacherDashboard();
+  const showLoading = useDelayedFlag(isLoading);
+  const isWaitingData = isLoading && !data;
 
-  if (isLoading) return <AppLayout><PageLoading /></AppLayout>;
+  if (isWaitingData && showLoading) return <AppLayout><DashboardSkeleton /></AppLayout>;
+  if (isWaitingData) return <AppLayout><div className="min-h-24" /></AppLayout>;
   if (!data) return <AppLayout><div>Erro</div></AppLayout>;
 
   return (

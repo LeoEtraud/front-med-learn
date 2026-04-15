@@ -1,0 +1,142 @@
+import React from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
+
+export function DashboardSkeleton() {
+  return (
+    <div className="mx-auto max-w-[92rem] min-w-0 space-y-6 sm:space-y-8">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-3">
+        {Array.from({ length: 3 }).map((_, index) => (
+          <div key={index} className="rounded-xl border border-border p-4 sm:p-6">
+            <div className="flex items-center gap-4">
+              <Skeleton className="h-12 w-12 rounded-full" />
+              <div className="space-y-2">
+                <Skeleton className="h-3 w-28" />
+                <Skeleton className="h-8 w-16" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-2 md:gap-8">
+        <div className="space-y-4">
+          <Skeleton className="h-6 w-44" />
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div key={index} className="rounded-xl border border-border p-4 sm:p-5">
+              <Skeleton className="mb-3 h-5 w-4/5" />
+              <Skeleton className="mb-4 h-4 w-2/3" />
+              <Skeleton className="h-2 w-full" />
+            </div>
+          ))}
+        </div>
+
+        <div className="space-y-4">
+          <Skeleton className="h-6 w-44" />
+          <div className="rounded-xl border border-border p-4">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <div key={index} className="space-y-2 py-3">
+                <Skeleton className="h-4 w-4/5" />
+                <Skeleton className="h-3 w-2/5" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function ProfileSkeleton() {
+  return (
+    <div className="mx-auto max-w-[92rem] min-w-0 space-y-6">
+      <div className="space-y-2">
+        <Skeleton className="h-3 w-24" />
+        <Skeleton className="h-8 w-40" />
+      </div>
+
+      <div className="rounded-xl border border-border p-6">
+        <div className="grid gap-4 sm:grid-cols-2">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div key={index} className="space-y-2">
+              <Skeleton className="h-3 w-24" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-border p-6">
+        <Skeleton className="mb-4 h-6 w-28" />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div key={index} className="space-y-2">
+              <Skeleton className="h-3 w-24" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ))}
+        </div>
+        <Skeleton className="mt-5 h-10 w-40" />
+      </div>
+    </div>
+  );
+}
+
+export function CourseEditorSkeleton() {
+  return (
+    <div className="mx-auto max-w-[92rem] min-w-0 space-y-6">
+      <div className="space-y-2 border-b pb-4">
+        <Skeleton className="h-3 w-28" />
+        <Skeleton className="h-8 w-72" />
+      </div>
+      <div className="flex gap-2">
+        <Skeleton className="h-10 w-40" />
+        <Skeleton className="h-10 w-40" />
+      </div>
+      {Array.from({ length: 3 }).map((_, index) => (
+        <div key={index} className="rounded-xl border border-border p-4">
+          <Skeleton className="mb-3 h-6 w-64" />
+          <Skeleton className="h-20 w-full" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function LessonViewerSkeleton() {
+  return (
+    <div className="flex w-full min-w-0 flex-col gap-4 lg:flex-row lg:gap-6">
+      <div className="order-1 flex min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-card lg:order-2">
+        <Skeleton className="aspect-video w-full rounded-none" />
+        <div className="space-y-4 p-4 sm:p-6 md:p-8">
+          <Skeleton className="h-8 w-2/3" />
+          <Skeleton className="h-4 w-1/4" />
+          <Skeleton className="h-20 w-full" />
+        </div>
+      </div>
+      <aside className="order-2 w-full rounded-xl border border-border bg-card p-4 lg:order-1 lg:w-80">
+        <Skeleton className="mb-4 h-6 w-full" />
+        {Array.from({ length: 6 }).map((_, index) => (
+          <Skeleton key={index} className="mb-2 h-10 w-full" />
+        ))}
+      </aside>
+    </div>
+  );
+}
+
+export function CourseCardGridSkeleton({ count = 6 }: { count?: number }) {
+  return (
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {Array.from({ length: count }).map((_, index) => (
+        <div key={index} className="overflow-hidden rounded-xl border border-border bg-card">
+          <Skeleton className="aspect-video w-full rounded-none" />
+          <div className="space-y-3 p-6">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-6 w-4/5" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-2/3" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}

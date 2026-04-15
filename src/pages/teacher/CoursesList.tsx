@@ -6,12 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Plus, Edit2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { PageLoading } from '@/components/ui/page-loading';
 import { CreateCourseModal } from '@/components/course-management/create-entity-modals';
+import { CourseCardGridSkeleton } from '@/components/ui/content-skeletons';
+import { useDelayedFlag } from '@/hooks/use-delayed-flag';
 
 // PÁGINA DE LISTA DE CURSOS - PÁGINA PARA LISTAR OS CURSOS DO PROFESSOR
 export default function CoursesList() {
   const { data: courses, isLoading } = useTeacherCourses();
+  const showLoading = useDelayedFlag(isLoading);
   const [isCreateCourseOpen, setIsCreateCourseOpen] = useState(false);
 
   return (
@@ -25,8 +27,10 @@ export default function CoursesList() {
           </Button>
         </div>
 
-        {isLoading ? (
-          <PageLoading message="Carregando cursos..." />
+        {isLoading && showLoading ? (
+          <CourseCardGridSkeleton count={4} />
+        ) : isLoading ? (
+          <div className="min-h-24" />
         ) : courses?.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-xl border border-dashed">
             <h3 className="text-xl font-bold mb-2">Você ainda não possui cursos</h3>

@@ -7,12 +7,14 @@ import { Clock, PlayCircle, ShieldCheck, CheckCircle2, ChevronDown, User } from 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { PageLoading } from '@/components/ui/page-loading';
 import { useToast } from '@/hooks/use-toast';
+import { useDelayedFlag } from '@/hooks/use-delayed-flag';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function CourseDetail() {
   const { id } = useParams<{id: string}>();
   const { data: course, isLoading } = usePublicCourse(id);
+  const showLoading = useDelayedFlag(isLoading);
   const { user } = useAuth();
   const enroll = useEnrollInCourse();
   const { toast } = useToast();
@@ -35,7 +37,26 @@ export default function CourseDetail() {
     }
   };
 
-  if (isLoading) return <PageLoading className="min-h-dvh" />;
+  if (isLoading && showLoading) {
+    return (
+      <div className="min-h-dvh overflow-x-hidden bg-slate-50 pb-12 sm:pb-20">
+        <div className="bg-sidebar py-12 sm:py-16 md:py-20">
+          <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 md:grid-cols-3 md:gap-10 lg:px-8">
+            <div className="space-y-4 md:col-span-2">
+              <Skeleton className="h-8 w-20 bg-white/20" />
+              <Skeleton className="h-12 w-4/5 bg-white/25" />
+              <Skeleton className="h-6 w-3/5 bg-white/20" />
+            </div>
+            <div className="rounded-xl bg-white p-5 sm:p-6">
+              <Skeleton className="mb-6 h-10 w-full" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (isLoading) return <div className="min-h-24" />;
   if (!course) return <div className="p-20 text-center">Curso não encontrado.</div>;
 
   return (

@@ -4,7 +4,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PasswordInput } from '@/components/ui/password-input';
 import { Button } from '@/components/ui/button';
-import { PageLoading } from '@/components/ui/page-loading';
+import { ProfileSkeleton } from '@/components/ui/content-skeletons';
 import { ProfileAccessSection } from '@/components/profile/ProfileAccessSection';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -14,10 +14,12 @@ import {
 } from '@/hooks/use-teacher';
 import { formatCpf, formatPhoneBR, isValidCpf, isValidPhoneBR } from '@/lib/profile-formatters';
 import { MEDICAL_SPECIALTIES } from '@/lib/medical-specialties';
+import { useDelayedFlag } from '@/hooks/use-delayed-flag';
 
 export default function TeacherProfile() {
   const { toast } = useToast();
   const { data: profile, isLoading } = useTeacherProfile();
+  const showLoading = useDelayedFlag(isLoading);
   const updateProfile = useUpdateTeacherProfile();
   const updatePassword = useUpdateTeacherPassword();
 
@@ -132,7 +134,10 @@ export default function TeacherProfile() {
     }
   };
 
-  if (isLoading) return <AppLayout><PageLoading message="Carregando perfil..." /></AppLayout>;
+  if (isLoading && !profile) {
+    if (!showLoading) return <AppLayout><div className="min-h-24" /></AppLayout>;
+    return <AppLayout><ProfileSkeleton /></AppLayout>;
+  }
   if (!profile) return <AppLayout><div>Não foi possível carregar o perfil.</div></AppLayout>;
 
   return (

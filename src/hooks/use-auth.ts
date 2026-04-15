@@ -7,6 +7,7 @@ import { useLocation } from 'wouter';
 export function useAuth() {
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
+  const token = localStorage.getItem('medlearn_token');
 
   const { data: user, isLoading, error } = useQuery({
     queryKey: ['auth', 'me'],
@@ -21,6 +22,9 @@ export function useAuth() {
       }
     },
     staleTime: Infinity,
+    enabled: !!token,
+    initialData: token ? () => queryClient.getQueryData<UserProfile | null>(['auth', 'me']) ?? undefined : null,
+    placeholderData: (previousData) => previousData,
   });
 
   const login = useMutation({
