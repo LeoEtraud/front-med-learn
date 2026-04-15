@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, Link } from 'wouter';
+import { useParams, Link, useLocation } from 'wouter';
 import { usePublicCourse } from '@/hooks/use-courses';
 import { useAuth } from '@/hooks/use-auth';
 import { useEnrollInCourse } from '@/hooks/use-student';
@@ -13,6 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export default function CourseDetail() {
   const { id } = useParams<{id: string}>();
+  const [, setLocation] = useLocation();
   const { data: course, isLoading } = usePublicCourse(id);
   const showLoading = useDelayedFlag(isLoading);
   const { user } = useAuth();
@@ -21,7 +22,16 @@ export default function CourseDetail() {
 
   const handleEnroll = async () => {
     if (!user) {
-      window.location.href = '/login';
+      setLocation('/login');
+      return;
+    }
+    if (user.role !== 'STUDENT') {
+      toast({
+        variant: "warning",
+        title: "Apenas alunos podem se inscrever",
+        description: "Redirecionando para seu painel.",
+      });
+      setLocation(user.role === 'TEACHER' ? '/teacher/dashboard' : '/');
       return;
     }
     try {
@@ -31,8 +41,17 @@ export default function CourseDetail() {
         title: "Inscrição confirmada!",
         description: "Bem-vindo ao curso.",
       });
-      window.location.href = `/student/courses`;
+      setLocation('/student/courses');
     } catch (e: any) {
+      if (e?.response?.status === 409) {
+        toast({
+          variant: "warning",
+          title: "Você já está inscrito neste curso",
+          description: "Redirecionando para seus cursos.",
+        });
+        setLocation('/student/courses');
+        return;
+      }
       toast({ variant: "destructive", title: "Erro", description: e.response?.data?.error || "Falha ao se inscrever." });
     }
   };
@@ -64,7 +83,16 @@ export default function CourseDetail() {
       {/* Header Banner */}
       <div className="relative overflow-hidden bg-sidebar py-12 text-white sm:py-16 md:py-20">
         <div className="absolute inset-0 opacity-20">
-          {course.coverImageUrl && <img src={course.coverImageUrl} className="h-full w-full object-cover blur-sm" alt="" />}
+          {course.coverImageUrl && (
+            <img
+              src={course.coverImageUrl}
+              className="h-full w-full object-cover blur-sm"
+              alt=""
+              onError={(event) => {
+                event.currentTarget.style.display = 'none';
+              }}
+            />
+          )}
         </div>
         <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-8 px-4 sm:px-6 md:grid-cols-3 md:gap-10 lg:px-8">
           <div className="min-w-0 md:col-span-2">

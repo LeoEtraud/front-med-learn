@@ -3,6 +3,7 @@ import { useParams } from 'wouter';
 import {
   useTeacherCourse,
   useUpdateCourse,
+  useSetCourseStatus,
   usePresignLessonVideo,
   useUpdateLesson,
 } from '@/hooks/use-teacher';
@@ -24,10 +25,15 @@ import {
 } from '@/components/ui/alert-dialog';
 import { CourseEditorSkeleton } from '@/components/ui/content-skeletons';
 import { useForm } from 'react-hook-form';
-import { Plus, Video, FileQuestion, GripVertical, Upload, Trash2 } from 'lucide-react';
+import { Plus, Video, FileQuestion, GripVertical, Upload, Trash2, ImagePlus, BookCheck, Save } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { CreateLessonModal, CreateModuleModal } from '@/components/course-management/create-entity-modals';
 import { useDelayedFlag } from '@/hooks/use-delayed-flag';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { MEDICAL_SPECIALTIES } from '@/lib/medical-specialties';
+import { uploadCourseCoverFile } from '@/lib/course-cover-upload';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 // FUNÇÃO PARA PARSEAR O ERRO DO S3
 function parseS3ErrorText(raw: string): string | null {
@@ -310,12 +316,27 @@ function LessonEditorRow({ lesson }: { lesson: Lesson }) {
   );
 }
 
+const courseInfoSchema = z.object({
+  title: z.string().trim().min(3, 'Título é obrigatório'),
+  subtitle: z.string().trim().optional(),
+  shortDescription: z.string().trim().min(12, 'Descrição curta é obrigatória'),
+  description: z.string().trim().optional(),
+  specialty: z.string().trim().min(1, 'Especialidade é obrigatória'),
+  level: z.enum(['BASIC', 'INTERMEDIATE', 'ADVANCED']),
+  workloadHours: z
+    .union([z.literal(''), z.coerce.number().int().min(1, 'Carga horária deve ser maior que 0')])
+    .optional(),
+  tags: z.string().trim().optional(),
+  coverImageUrl: z.string().trim().optional(),
+});
+
 // PÁGINA DE EDITOR DE CURSO - PÁGINA PARA EDITAR UM CURSO
 export default function CourseEditor() {
   const { id } = useParams<{ id: string }>();
   const { data: course, isLoading } = useTeacherCourse(id!);
   const showLoading = useDelayedFlag(isLoading);
   const updateCourse = useUpdateCourse();
+  const setCourseStatus = useSetCourseStatus();
   const { toast } = useToast();
 
   const [activeTab, setActiveTab] = useState<'info' | 'modules'>('modules');
@@ -323,28 +344,103 @@ export default function CourseEditor() {
   const [isLessonModalOpen, setIsLessonModalOpen] = useState(false);
   const [selectedModuleIdForLesson, setSelectedModuleIdForLesson] = useState<string | undefined>(undefined);
 
-  type CourseInfoForm = {
-    title?: string;
-    subtitle?: string;
-    description?: string;
-  };
+  type CourseInfoForm = z.infer<typeof courseInfoSchema>;
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [coverUploadError, setCoverUploadError] = useState<string | null>(null);
 
-  const { register, handleSubmit } = useForm<CourseInfoForm>({
-    values: course
-      ? {
-          title: course.title ?? undefined,
-          subtitle: course.subtitle ?? undefined,
-          description: course.description ?? undefined,
-        }
-      : {},
+  const form = useForm<CourseInfoForm>({
+    resolver: zodResolver(courseInfoSchema),
+    defaultValues: {
+      title: '',
+      subtitle: '',
+      shortDescription: '',
+      description: '',
+      specialty: '',
+      level: 'BASIC',
+      workloadHours: '',
+      tags: '',
+      coverImageUrl: '',
+    },
   });
+
+  useEffect(() => {
+    if (!course) return;
+    const hasKnownSpecialty = !!course.specialty && MEDICAL_SPECIALTIES.includes(course.specialty as (typeof MEDICAL_SPECIALTIES)[number]);
+    form.reset({
+      title: course.title ?? '',
+      subtitle: course.subtitle ?? '',
+      shortDescription: course.shortDescription ?? '',
+      description: course.description ?? '',
+      specialty: hasKnownSpecialty ? course.specialty ?? '' : '',
+      level: course.level ?? 'BASIC',
+      workloadHours: course.workloadHours ?? '',
+      tags: course.tags?.join(', ') ?? '',
+      coverImageUrl: course.coverImageUrl ?? '',
+    });
+    setCoverUploadError(null);
+  }, [course, form]);
 
   const onSaveInfo = async (data: CourseInfoForm) => {
     try {
-      await updateCourse.mutateAsync({ id: id!, data });
+      await updateCourse.mutateAsync({
+        id: id!,
+        data: {
+          title: data.title,
+          subtitle: data.subtitle || undefined,
+          shortDescription: data.shortDescription,
+          description: data.description || undefined,
+          specialty: data.specialty,
+          level: data.level,
+          workloadHours: data.workloadHours === '' ? undefined : data.workloadHours,
+          coverImageUrl: data.coverImageUrl || undefined,
+          tags: data.tags
+            ? data.tags
+                .split(',')
+                .map((tag) => tag.trim())
+                .filter(Boolean)
+            : [],
+        },
+      });
       toast({ variant: 'success', title: 'Curso atualizado' });
     } catch {
       toast({ variant: 'destructive', title: 'Erro ao salvar' });
+    }
+  };
+
+  const handleCoverChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+
+    try {
+      setCoverUploadError(null);
+      const dataUrl = await uploadCourseCoverFile(file);
+      form.setValue('coverImageUrl', dataUrl, { shouldDirty: true, shouldValidate: true });
+    } catch (error: any) {
+      setCoverUploadError(error?.message ?? 'Falha ao carregar imagem.');
+    }
+  };
+
+  const handleRemoveCover = () => {
+    setCoverUploadError(null);
+    form.setValue('coverImageUrl', '', { shouldDirty: true, shouldValidate: true });
+  };
+
+  const handlePublishToggle = async () => {
+    if (!course) return;
+    const shouldPublish = course.status !== 'PUBLISHED';
+    try {
+      await setCourseStatus.mutateAsync({ id: course.id, status: shouldPublish ? 'PUBLISHED' : 'DRAFT' });
+      toast({
+        variant: 'success',
+        title: shouldPublish ? 'Curso publicado com sucesso' : 'Curso voltou para rascunho',
+      });
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Não foi possível alterar o status',
+        description: error?.response?.data?.error ?? 'Tente novamente.',
+      });
     }
   };
 
@@ -384,8 +480,14 @@ export default function CourseEditor() {
             <p className="mb-1 text-sm font-bold uppercase tracking-wider text-muted-foreground">Editor de Curso</p>
             <h1 className="font-display text-xl font-bold sm:text-2xl md:text-3xl">{course.title}</h1>
           </div>
-          <Button variant="outline" className="w-full shrink-0 sm:w-auto">
-            Pré-visualizar
+          <Button
+            variant={course.status === 'PUBLISHED' ? 'secondary' : 'default'}
+            className="w-full shrink-0 sm:w-auto"
+            isLoading={setCourseStatus.isPending}
+            onClick={handlePublishToggle}
+          >
+            <BookCheck className="mr-2 h-4 w-4" />
+            {course.status === 'PUBLISHED' ? 'Despublicar curso' : 'Publicar curso'}
           </Button>
         </div>
 
@@ -409,25 +511,129 @@ export default function CourseEditor() {
         {activeTab === 'info' && (
           <Card>
             <CardContent className="p-4 sm:p-6">
-              <form onSubmit={handleSubmit(onSaveInfo)} className="space-y-4">
+              <form onSubmit={form.handleSubmit(onSaveInfo)} className="space-y-4">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  className="hidden"
+                  onChange={handleCoverChange}
+                />
+
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Título</label>
-                    <Input {...register('title')} />
+                    <label className="text-sm font-medium">Título *</label>
+                    <Input {...form.register('title')} />
+                    {form.formState.errors.title ? (
+                      <p className="text-xs font-medium text-destructive">{form.formState.errors.title.message}</p>
+                    ) : null}
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Subtítulo</label>
-                    <Input {...register('subtitle')} />
+                    <Input {...form.register('subtitle')} />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Especialidade *</label>
+                    <Select
+                      value={form.watch('specialty') || undefined}
+                      onValueChange={(value) => form.setValue('specialty', value, { shouldValidate: true })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione uma especialidade" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {MEDICAL_SPECIALTIES.map((option) => (
+                          <SelectItem key={option} value={option}>
+                            {option}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {form.formState.errors.specialty ? (
+                      <p className="text-xs font-medium text-destructive">{form.formState.errors.specialty.message}</p>
+                    ) : null}
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Nível *</label>
+                    <Select
+                      value={form.watch('level')}
+                      onValueChange={(value) => form.setValue('level', value as CourseInfoForm['level'], { shouldValidate: true })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="BASIC">Básico</SelectItem>
+                        <SelectItem value="INTERMEDIATE">Intermediário</SelectItem>
+                        <SelectItem value="ADVANCED">Avançado</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Carga horária (horas)</label>
+                    <Input type="number" min={1} {...form.register('workloadHours')} />
+                    {form.formState.errors.workloadHours ? (
+                      <p className="text-xs font-medium text-destructive">{form.formState.errors.workloadHours.message}</p>
+                    ) : null}
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Tags</label>
+                    <Input {...form.register('tags')} placeholder="cardio, urgência, internato" />
+                    <p className="text-xs text-muted-foreground">Separe as tags por vírgula.</p>
                   </div>
                 </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Descrição curta *</label>
+                  <Input {...form.register('shortDescription')} />
+                  {form.formState.errors.shortDescription ? (
+                    <p className="text-xs font-medium text-destructive">{form.formState.errors.shortDescription.message}</p>
+                  ) : null}
+                </div>
+
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Descrição Completa</label>
                   <textarea
-                    {...register('description')}
+                    {...form.register('description')}
                     className="min-h-32 w-full resize-y rounded-md border border-input bg-background p-3 text-base md:text-sm"
                   />
                 </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Capa do curso</label>
+                  <div className="space-y-2 rounded-lg border border-border/70 p-3">
+                    {form.watch('coverImageUrl') ? (
+                      <div className="overflow-hidden rounded-md border border-border/70 bg-muted">
+                        <img
+                          src={form.watch('coverImageUrl')}
+                          alt="Pré-visualização da capa"
+                          className="h-40 w-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex h-28 items-center justify-center rounded-md border border-dashed border-border bg-muted/40 text-sm text-muted-foreground">
+                        Nenhuma imagem selecionada
+                      </div>
+                    )}
+                    <div className="flex flex-wrap gap-2">
+                      <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                        <ImagePlus className="mr-2 h-4 w-4" />
+                        {form.watch('coverImageUrl') ? 'Trocar imagem' : 'Selecionar imagem'}
+                      </Button>
+                      {form.watch('coverImageUrl') ? (
+                        <Button type="button" variant="ghost" size="sm" onClick={handleRemoveCover}>
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Remover
+                        </Button>
+                      ) : null}
+                    </div>
+                  </div>
+                  {coverUploadError ? <p className="text-xs font-medium text-destructive">{coverUploadError}</p> : null}
+                  <p className="text-xs text-muted-foreground">Formatos aceitos: JPEG, PNG, WebP ou GIF (até 3 MB).</p>
+                </div>
+
                 <Button type="submit" isLoading={updateCourse.isPending}>
+                  <Save className="mr-2 h-4 w-4" />
                   Salvar Alterações
                 </Button>
               </form>

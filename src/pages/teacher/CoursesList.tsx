@@ -1,20 +1,39 @@
 import React, { useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { useTeacherCourses } from '@/hooks/use-teacher';
+import { useSetCourseStatus, useTeacherCourses } from '@/hooks/use-teacher';
 import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
-import { Plus, Edit2 } from 'lucide-react';
+import { Plus, Edit2, Clock3, CheckCircle2, FileText } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CreateCourseModal } from '@/components/course-management/create-entity-modals';
 import { CourseCardGridSkeleton } from '@/components/ui/content-skeletons';
 import { useDelayedFlag } from '@/hooks/use-delayed-flag';
+import { useToast } from '@/hooks/use-toast';
 
 // PÁGINA DE LISTA DE CURSOS - PÁGINA PARA LISTAR OS CURSOS DO PROFESSOR
 export default function CoursesList() {
   const { data: courses, isLoading } = useTeacherCourses();
+  const setCourseStatus = useSetCourseStatus();
   const showLoading = useDelayedFlag(isLoading);
   const [isCreateCourseOpen, setIsCreateCourseOpen] = useState(false);
+  const { toast } = useToast();
+
+  const handlePublishToggle = async (courseId: string, shouldPublish: boolean) => {
+    try {
+      await setCourseStatus.mutateAsync({ id: courseId, status: shouldPublish ? 'PUBLISHED' : 'DRAFT' });
+      toast({
+        variant: 'success',
+        title: shouldPublish ? 'Curso publicado' : 'Curso movido para rascunho',
+      });
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Não foi possível atualizar o status',
+        description: error?.response?.data?.error ?? 'Tente novamente.',
+      });
+    }
+  };
 
   return (
     <AppLayout>
@@ -38,40 +57,64 @@ export default function CoursesList() {
             <Button onClick={() => setIsCreateCourseOpen(true)}>Criar Meu Primeiro Curso</Button>
           </div>
         ) : (
-          <div className="grid gap-4">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {courses?.map(course => (
               <Card key={course.id} className="overflow-hidden">
-                <div className="flex flex-col md:flex-row">
-                  <div className="w-full md:w-48 h-32 bg-slate-100 shrink-0">
-                    {course.coverImageUrl ? (
-                      <img src={course.coverImageUrl} className="w-full h-full object-cover" alt="" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-slate-300">Sem Capa</div>
-                    )}
+                <div className="relative aspect-video w-full bg-slate-100">
+                  <div className="absolute inset-0 flex h-full w-full items-center justify-center text-slate-400">
+                    <FileText className="h-8 w-8" />
                   </div>
-                  <CardContent className="p-6 flex-1 flex flex-col justify-center">
-                    <div className="mb-2 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                      <div className="min-w-0">
-                        <div className="mb-1 flex flex-wrap items-center gap-2">
-                          <Badge variant={course.status === 'PUBLISHED' ? 'success' : 'secondary'}>{course.status}</Badge>
-                          <span className="text-xs font-medium uppercase text-slate-500">{course.level}</span>
-                        </div>
-                        <h3 className="text-base font-bold text-slate-900 sm:text-lg">{course.title}</h3>
-                      </div>
-                      <div className="flex shrink-0 gap-2">
-                        <Link href={`/teacher/courses/${course.id}/edit`} className="w-full sm:w-auto">
-                          <Button variant="outline" size="sm" className="w-full sm:w-auto">
-                            <Edit2 className="mr-2 h-4 w-4" /> Editar
-                          </Button>
-                        </Link>
-                      </div>
-                    </div>
-                    <div className="mt-3 flex flex-wrap gap-4 text-sm text-slate-600 sm:mt-4 sm:gap-6">
-                      <div><strong className="text-slate-900">{course.enrollmentCount}</strong> alunos</div>
-                      <div><strong className="text-slate-900">{course.completionRate}%</strong> conclusão</div>
-                    </div>
-                  </CardContent>
+                  {course.coverImageUrl ? (
+                    <img
+                      src={course.coverImageUrl}
+                      className="absolute inset-0 h-full w-full object-cover"
+                      alt={`Capa do curso ${course.title}`}
+                      onError={(event) => {
+                        event.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  ) : null}
                 </div>
+                <CardContent className="flex h-full flex-col p-5">
+                  <div className="mb-2 flex items-center justify-between gap-2">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-teal-600">
+                      {course.specialty || 'Especialidade não informada'}
+                    </span>
+                    <Badge variant={course.status === 'PUBLISHED' ? 'success' : 'secondary'}>
+                      {course.status === 'PUBLISHED' ? 'Publicado' : 'Rascunho'}
+                    </Badge>
+                  </div>
+                  <h3 className="line-clamp-2 text-xl font-bold text-slate-900">{course.title}</h3>
+                  <p className="mt-2 line-clamp-2 text-sm text-slate-600">
+                    {course.shortDescription || course.subtitle || 'Sem descrição resumida.'}
+                  </p>
+
+                  <div className="mt-4 flex items-center justify-between border-t border-border/70 pt-4 text-sm text-slate-600">
+                    <div className="flex items-center gap-1">
+                      <Clock3 className="h-4 w-4" />
+                      {course.workloadHours ? `${course.workloadHours}h` : '--'}
+                    </div>
+                    <div className="text-xs font-medium uppercase text-slate-500">{course.level}</div>
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap items-center gap-2">
+                    <Link href={`/teacher/courses/${course.id}/edit`} className="flex-1 min-w-[8.5rem]">
+                      <Button variant="outline" size="sm" className="w-full">
+                        <Edit2 className="mr-2 h-4 w-4" /> Editar
+                      </Button>
+                    </Link>
+                    <Button
+                      size="sm"
+                      className="flex-1 min-w-[8.5rem]"
+                      variant={course.status === 'PUBLISHED' ? 'secondary' : 'default'}
+                      isLoading={setCourseStatus.isPending}
+                      onClick={() => handlePublishToggle(course.id, course.status !== 'PUBLISHED')}
+                    >
+                      <CheckCircle2 className="mr-2 h-4 w-4" />
+                      {course.status === 'PUBLISHED' ? 'Despublicar' : 'Publicar'}
+                    </Button>
+                  </div>
+                </CardContent>
               </Card>
             ))}
           </div>

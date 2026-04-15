@@ -67,6 +67,9 @@ export default function CourseCatalog() {
             {data?.courses.map(course => (
               <Card key={course.id} className="card-hover flex flex-col group">
                 <div className="aspect-video bg-slate-100 relative overflow-hidden">
+                  <div className="absolute inset-0 flex h-full w-full items-center justify-center bg-primary/5">
+                    <BookOpen className="w-12 h-12 text-primary/30" />
+                  </div>
                   {course.coverImageUrl ? (
                     <img
                       src={course.coverImageUrl}
@@ -74,12 +77,11 @@ export default function CourseCatalog() {
                       loading="lazy"
                       decoding="async"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      onError={(event) => {
+                        event.currentTarget.style.display = 'none';
+                      }}
                     />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-primary/5">
-                      <BookOpen className="w-12 h-12 text-primary/30" />
-                    </div>
-                  )}
+                  ) : null}
                   <Badge className="absolute top-3 right-3 bg-white/90 text-primary hover:bg-white">{course.level}</Badge>
                 </div>
                 <CardContent className="p-6 flex flex-col flex-1">

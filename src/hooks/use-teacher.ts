@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/axios';
-import { TeacherDashboard, CourseWithStats, CourseDetail, UserProfile } from '@/types/api';
+import { TeacherDashboard, CourseWithStats, CourseDetail, CourseStatus, UserProfile } from '@/types/api';
 
 // FUNÇÃO PARA CONSULTAR DADOS DO DASHBOARD DO PROFESSOR
 export function useTeacherDashboard() {
@@ -105,6 +105,23 @@ export function usePublishCourse() {
     onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: ['teacher-course', id] });
       queryClient.invalidateQueries({ queryKey: ['teacher-courses'] });
+    },
+  });
+}
+
+// FUNÇÃO PARA ALTERAR STATUS DE PUBLICAÇÃO DO CURSO
+export function useSetCourseStatus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: Extract<CourseStatus, 'DRAFT' | 'PUBLISHED'> }) => {
+      const endpoint = status === 'PUBLISHED' ? 'publish' : 'unpublish';
+      const res = await api.post(`/teacher/courses/${id}/${endpoint}`);
+      return res.data;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['teacher-course', variables.id] });
+      queryClient.invalidateQueries({ queryKey: ['teacher-courses'] });
+      queryClient.invalidateQueries({ queryKey: ['teacher-dashboard'] });
     },
   });
 }

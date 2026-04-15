@@ -10,6 +10,7 @@ import ResetPassword from "@/pages/auth/ResetPassword";
 import CourseCatalog from "@/pages/public/CourseCatalog";
 import CourseDetail from "@/pages/public/CourseDetail";
 import StudentDashboard from "@/pages/student/Dashboard";
+import StudentCourses from "@/pages/student/Courses";
 import StudentProfile from "@/pages/student/Profile";
 import LessonViewer from "@/pages/student/LessonViewer";
 import TeacherDashboard from "@/pages/teacher/Dashboard";
@@ -44,7 +45,7 @@ function Router() {
 
       {/* Student */}
       <Route path="/student/dashboard" component={StudentDashboard} />
-      <Route path="/student/courses" component={StudentDashboard} /> {/* Reuse dashboard for simplicity in this artifact, normally a list view */}
+      <Route path="/student/courses" component={StudentCourses} />
       <Route path="/student/profile" component={StudentProfile} />
       <Route path="/student/courses/:courseId/lessons/:lessonId" component={LessonViewer} />
 
