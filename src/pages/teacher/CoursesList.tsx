@@ -7,7 +7,7 @@ import { Plus, Edit2, Clock3, FileText, Trash2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CreateCourseModal } from '@/components/course-management/create-entity-modals';
-import { CourseCardGridSkeleton } from '@/components/ui/content-skeletons';
+import { TeacherCoursesGridSkeleton } from '@/components/ui/content-skeletons';
 import { useDelayedFlag } from '@/hooks/use-delayed-flag';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -107,7 +107,7 @@ export default function CoursesList() {
         </div>
 
         {isLoading && showLoading ? (
-          <CourseCardGridSkeleton count={4} />
+          <TeacherCoursesGridSkeleton count={4} />
         ) : isLoading ? (
           <div className="min-h-24" />
         ) : courses?.length === 0 ? (

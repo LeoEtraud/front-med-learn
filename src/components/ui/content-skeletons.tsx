@@ -140,3 +140,42 @@ export function CourseCardGridSkeleton({ count = 6 }: { count?: number }) {
     </div>
   );
 }
+
+export function TeacherCoursesGridSkeleton({ count = 4 }: { count?: number }) {
+  return (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {Array.from({ length: count }).map((_, index) => (
+        <div
+          key={index}
+          className="flex h-full flex-col overflow-hidden rounded-xl border border-border/70 bg-card shadow-sm"
+        >
+          <Skeleton className="aspect-video w-full rounded-none" />
+          <div className="flex h-full flex-col gap-3 p-3 sm:gap-3.5 sm:p-4 xl:gap-3 xl:p-3 2xl:gap-3.5 2xl:p-4">
+            <div className="flex items-start justify-between gap-2">
+              <Skeleton className="h-3 w-28 sm:h-3.5" />
+              <Skeleton className="h-5 w-20 rounded-full" />
+            </div>
+            <Skeleton className="h-5 w-4/5 sm:h-6 xl:h-5 2xl:h-6" />
+            <div className="space-y-1.5">
+              <Skeleton className="h-3 w-full sm:h-3.5" />
+              <Skeleton className="h-3 w-3/5 sm:h-3.5" />
+            </div>
+
+            <div className="flex items-center justify-between border-t border-border/80 pt-2.5 sm:pt-3">
+              <div className="flex items-center gap-1.5">
+                <Skeleton className="h-3.5 w-3.5 rounded-full sm:h-4 sm:w-4" />
+                <Skeleton className="h-3 w-10 sm:h-3.5" />
+              </div>
+              <Skeleton className="h-3 w-20 sm:h-3.5" />
+            </div>
+
+            <div className="mt-auto flex flex-wrap items-center gap-1.5 pt-1 sm:gap-2">
+              <Skeleton className="h-8 w-full flex-1 min-w-full sm:min-w-[8.5rem] sm:h-9" />
+              <Skeleton className="h-8 w-full flex-1 min-w-full sm:min-w-[8.5rem] sm:h-9" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
