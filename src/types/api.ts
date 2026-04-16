@@ -63,7 +63,18 @@ export interface Lesson {
   videoObjectKey?: string | null;
   /** URL temporária (presign GET) para vídeo no bucket privado. */
   videoPlaybackUrl?: string | null;
+  /** Duração do vídeo em segundos. */
   duration?: number | null;
+  /** Tamanho do arquivo de vídeo em bytes (apenas editor do professor). */
+  videoSizeBytes?: number | null;
+  /** Content-Type do vídeo (ex.: "video/mp4"). */
+  videoContentType?: string | null;
+  /** Largura do vídeo em pixels. */
+  videoWidth?: number | null;
+  /** Altura do vídeo em pixels. */
+  videoHeight?: number | null;
+  /** Data em que o vídeo foi enviado/publicado (ISO string). */
+  videoUploadedAt?: string | null;
   isPublished: boolean;
   createdAt: string;
 }

@@ -94,6 +94,22 @@ export function useCreateLesson() {
   });
 }
 
+// FUNÇÃO PARA EXCLUIR UM CURSO (REMOÇÃO COMPLETA, INCLUINDO MÓDULOS E AULAS POR CASCADE)
+export function useDeleteCourse() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const res = await api.delete(`/teacher/courses/${id}`);
+      return res.data;
+    },
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ['teacher-courses'] });
+      queryClient.invalidateQueries({ queryKey: ['teacher-dashboard'] });
+      queryClient.removeQueries({ queryKey: ['teacher-course', id] });
+    },
+  });
+}
+
 // FUNÇÃO PARA PUBLICAR UM CURSO
 export function usePublishCourse() {
   const queryClient = useQueryClient();

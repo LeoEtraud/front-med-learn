@@ -1,35 +1,55 @@
 import React, { useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { useSetCourseStatus, useTeacherCourses } from '@/hooks/use-teacher';
+import { useDeleteCourse, useTeacherCourses } from '@/hooks/use-teacher';
 import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
-import { Plus, Edit2, Clock3, CheckCircle2, FileText } from 'lucide-react';
+import { Plus, Edit2, Clock3, FileText, Trash2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CreateCourseModal } from '@/components/course-management/create-entity-modals';
 import { CourseCardGridSkeleton } from '@/components/ui/content-skeletons';
 import { useDelayedFlag } from '@/hooks/use-delayed-flag';
 import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 // PÁGINA DE LISTA DE CURSOS - PÁGINA PARA LISTAR OS CURSOS DO PROFESSOR
 export default function CoursesList() {
   const { data: courses, isLoading } = useTeacherCourses();
-  const setCourseStatus = useSetCourseStatus();
+  const deleteCourse = useDeleteCourse();
   const showLoading = useDelayedFlag(isLoading);
   const [isCreateCourseOpen, setIsCreateCourseOpen] = useState(false);
+  const [courseToDelete, setCourseToDelete] = useState<{ id: string; title: string } | null>(null);
   const { toast } = useToast();
+  const levelLabel: Record<string, string> = {
+    BASIC: 'Básico',
+    BEGINNER: 'Básico',
+    INTERMEDIATE: 'Intermediário',
+    ADVANCED: 'Avançado',
+  };
 
-  const handlePublishToggle = async (courseId: string, shouldPublish: boolean) => {
+  const handleConfirmDelete = async () => {
+    if (!courseToDelete) return;
     try {
-      await setCourseStatus.mutateAsync({ id: courseId, status: shouldPublish ? 'PUBLISHED' : 'DRAFT' });
+      await deleteCourse.mutateAsync(courseToDelete.id);
       toast({
         variant: 'success',
-        title: shouldPublish ? 'Curso publicado' : 'Curso movido para rascunho',
+        title: 'Curso excluído',
+        description: `"${courseToDelete.title}" foi removido com sucesso.`,
       });
+      setCourseToDelete(null);
     } catch (error: any) {
       toast({
         variant: 'destructive',
-        title: 'Não foi possível atualizar o status',
+        title: 'Não foi possível excluir o curso',
         description: error?.response?.data?.error ?? 'Tente novamente.',
       });
     }
@@ -38,11 +58,51 @@ export default function CoursesList() {
   return (
     <AppLayout>
       <CreateCourseModal open={isCreateCourseOpen} onOpenChange={setIsCreateCourseOpen} />
+
+      <AlertDialog
+        open={!!courseToDelete}
+        onOpenChange={(open) => {
+          if (!open && !deleteCourse.isPending) setCourseToDelete(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir curso</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir o curso{' '}
+              <span className="font-semibold text-foreground">"{courseToDelete?.title}"</span>? Esta ação é permanente e
+              removerá também todos os módulos, aulas e matrículas relacionadas.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteCourse.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={(event) => {
+                event.preventDefault();
+                handleConfirmDelete();
+              }}
+              disabled={deleteCourse.isPending}
+            >
+              {deleteCourse.isPending ? 'Excluindo...' : 'Excluir curso'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <div className="mx-auto max-w-[92rem] min-w-0 space-y-6">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <h1 className="font-display text-xl font-bold sm:text-2xl">Gerenciar Cursos</h1>
-          <Button className="w-full sm:w-auto" onClick={() => setIsCreateCourseOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> Novo Curso
+        <div className="flex items-start justify-between gap-3 sm:items-center">
+          <div className="inline-flex w-fit flex-col gap-2">
+            <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">Gerenciar Cursos</h1>
+            <div className="h-1 w-full rounded-full bg-primary/80" />
+          </div>
+          <Button
+            className="h-11 w-11 shrink-0 px-0 sm:h-auto sm:w-auto sm:px-4"
+            onClick={() => setIsCreateCourseOpen(true)}
+            aria-label="Novo Curso"
+          >
+            <Plus className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Novo Curso</span>
           </Button>
         </div>
 
@@ -57,11 +117,14 @@ export default function CoursesList() {
             <Button onClick={() => setIsCreateCourseOpen(true)}>Criar Meu Primeiro Curso</Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {courses?.map(course => (
-              <Card key={course.id} className="overflow-hidden">
-                <div className="relative aspect-video w-full bg-slate-100">
-                  <div className="absolute inset-0 flex h-full w-full items-center justify-center text-slate-400">
+              <Card
+                key={course.id}
+                className="flex h-full flex-col overflow-hidden border-border/70 bg-card shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
+              >
+                <div className="relative aspect-video w-full bg-muted">
+                  <div className="absolute inset-0 flex h-full w-full items-center justify-center text-muted-foreground">
                     <FileText className="h-8 w-8" />
                   </div>
                   {course.coverImageUrl ? (
@@ -75,43 +138,51 @@ export default function CoursesList() {
                     />
                   ) : null}
                 </div>
-                <CardContent className="flex h-full flex-col p-5">
-                  <div className="mb-2 flex items-center justify-between gap-2">
-                    <span className="text-xs font-semibold uppercase tracking-wide text-teal-600">
+                <CardContent className="flex h-full flex-col gap-3 p-3 sm:gap-3.5 sm:p-4 xl:gap-3 xl:p-3 2xl:gap-3.5 2xl:p-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="line-clamp-1 text-[11px] font-semibold uppercase tracking-wide text-primary sm:text-xs">
                       {course.specialty || 'Especialidade não informada'}
                     </span>
                     <Badge variant={course.status === 'PUBLISHED' ? 'success' : 'secondary'}>
                       {course.status === 'PUBLISHED' ? 'Publicado' : 'Rascunho'}
                     </Badge>
                   </div>
-                  <h3 className="line-clamp-2 text-xl font-bold text-slate-900">{course.title}</h3>
-                  <p className="mt-2 line-clamp-2 text-sm text-slate-600">
+                  <h3 className="line-clamp-2 text-base font-bold text-card-foreground sm:text-lg xl:text-base 2xl:text-lg">
+                    {course.title}
+                  </h3>
+                  <p className="line-clamp-2 text-xs leading-snug text-muted-foreground sm:text-sm xl:text-xs 2xl:text-sm">
                     {course.shortDescription || course.subtitle || 'Sem descrição resumida.'}
                   </p>
 
-                  <div className="mt-4 flex items-center justify-between border-t border-border/70 pt-4 text-sm text-slate-600">
+                  <div className="flex items-center justify-between border-t border-border/80 pt-2.5 text-xs text-muted-foreground sm:pt-3 sm:text-sm">
                     <div className="flex items-center gap-1">
-                      <Clock3 className="h-4 w-4" />
+                      <Clock3 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       {course.workloadHours ? `${course.workloadHours}h` : '--'}
                     </div>
-                    <div className="text-xs font-medium uppercase text-slate-500">{course.level}</div>
+                    <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground sm:text-xs">
+                      {levelLabel[course.level] || course.level}
+                    </div>
                   </div>
 
-                  <div className="mt-4 flex flex-wrap items-center gap-2">
-                    <Link href={`/teacher/courses/${course.id}/edit`} className="flex-1 min-w-[8.5rem]">
-                      <Button variant="outline" size="sm" className="w-full">
-                        <Edit2 className="mr-2 h-4 w-4" /> Editar
+                  <div className="mt-auto flex flex-wrap items-center gap-1.5 pt-1 sm:gap-2">
+                    <Link href={`/teacher/courses/${course.id}/edit`} className="flex-1 min-w-full sm:min-w-[8.5rem]">
+                      <Button
+                        variant="default"
+                        size="sm"
+                        className="w-full text-xs sm:text-sm"
+                      >
+                        <Edit2 className="mr-1.5 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4" /> Editar
                       </Button>
                     </Link>
                     <Button
                       size="sm"
-                      className="flex-1 min-w-[8.5rem]"
-                      variant={course.status === 'PUBLISHED' ? 'secondary' : 'default'}
-                      isLoading={setCourseStatus.isPending}
-                      onClick={() => handlePublishToggle(course.id, course.status !== 'PUBLISHED')}
+                      variant="outline"
+                      className="flex-1 min-w-full text-xs sm:min-w-[8.5rem] sm:text-sm border-destructive/30 text-destructive hover:border-destructive hover:bg-destructive hover:text-destructive-foreground focus-visible:ring-destructive"
+                      onClick={() => setCourseToDelete({ id: course.id, title: course.title })}
+                      aria-label={`Excluir curso ${course.title}`}
                     >
-                      <CheckCircle2 className="mr-2 h-4 w-4" />
-                      {course.status === 'PUBLISHED' ? 'Despublicar' : 'Publicar'}
+                      <Trash2 className="mr-1.5 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4" />
+                      Excluir curso
                     </Button>
                   </div>
                 </CardContent>

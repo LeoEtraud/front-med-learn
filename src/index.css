@@ -88,10 +88,10 @@
   --background: 222 30% 11%;
   --foreground: 210 20% 96%;
 
-  --card: 222 24% 16%;
+  --card: 220 22% 18%;
   --card-foreground: 210 20% 96%;
 
-  --border: 217 18% 28%;
+  --border: 216 18% 32%;
   --input: 217 18% 24%;
   --ring: 207 88% 64%;
 
@@ -123,6 +123,19 @@
 @layer base {
   * {
     @apply border-border;
+  }
+  button,
+  [role='button'],
+  a[href],
+  input[type='button'],
+  input[type='submit'],
+  input[type='reset'],
+  summary {
+    @apply cursor-pointer;
+  }
+  button:disabled,
+  input:disabled {
+    @apply cursor-not-allowed;
   }
   html {
     @apply overflow-x-hidden;
