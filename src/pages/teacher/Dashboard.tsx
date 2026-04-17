@@ -6,6 +6,32 @@ import { Users, FileVideo, Activity, Target } from 'lucide-react';
 import { DashboardSkeleton } from '@/components/ui/content-skeletons';
 import { useDelayedFlag } from '@/hooks/use-delayed-flag';
 
+function getStatusLabel(status: string): string {
+  switch (status) {
+    case 'PUBLISHED':
+      return 'PUBLICADO';
+    case 'DRAFT':
+      return 'RASCUNHO';
+    case 'ARCHIVED':
+      return 'ARQUIVADO';
+    default:
+      return status.toUpperCase();
+  }
+}
+
+function getStatusBadgeClass(status: string): string {
+  switch (status) {
+    case 'PUBLISHED':
+      return 'bg-emerald-700 text-white ring-1 ring-emerald-800/60';
+    case 'DRAFT':
+      return 'bg-amber-600 text-white ring-1 ring-amber-700/60';
+    case 'ARCHIVED':
+      return 'bg-slate-600 text-white ring-1 ring-slate-700/60';
+    default:
+      return 'bg-muted text-foreground ring-1 ring-border';
+  }
+}
+
 export default function TeacherDashboard() {
   const { data, isLoading } = useTeacherDashboard();
   const showLoading = useDelayedFlag(isLoading);
@@ -60,7 +86,7 @@ export default function TeacherDashboard() {
           <div className="hidden md:block">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[36rem] text-left text-sm">
-                <thead className="bg-muted/60 text-muted-foreground">
+                <thead className="bg-primary/20 text-foreground">
                   <tr>
                     <th className="px-4 py-3 font-medium lg:px-6 lg:py-4">Curso</th>
                     <th className="px-4 py-3 font-medium lg:px-6 lg:py-4">Status</th>
@@ -73,14 +99,8 @@ export default function TeacherDashboard() {
                     <tr key={course.id} className="transition-colors hover:bg-muted/40">
                       <td className="px-4 py-3 font-medium text-foreground lg:px-6 lg:py-4">{course.title}</td>
                       <td className="px-4 py-3 lg:px-6 lg:py-4">
-                        <span
-                          className={`rounded-md px-2 py-1 text-xs font-bold ${
-                            course.status === 'PUBLISHED'
-                              ? 'bg-emerald-500/20 text-emerald-300 ring-1 ring-emerald-400/35'
-                              : 'bg-muted text-muted-foreground ring-1 ring-border'
-                          }`}
-                        >
-                          {course.status}
+                        <span className={`rounded-md px-2.5 py-1 text-xs font-bold tracking-wide ${getStatusBadgeClass(course.status)}`}>
+                          {getStatusLabel(course.status)}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-foreground/90 lg:px-6 lg:py-4">{course.enrollmentCount}</td>
@@ -107,14 +127,8 @@ export default function TeacherDashboard() {
               >
                 <p className="mb-2 font-medium text-foreground">{course.title}</p>
                 <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                  <span
-                    className={`rounded-md px-2 py-1 text-xs font-bold ${
-                      course.status === 'PUBLISHED'
-                        ? 'bg-emerald-500/20 text-emerald-300 ring-1 ring-emerald-400/35'
-                        : 'bg-muted text-muted-foreground ring-1 ring-border'
-                    }`}
-                  >
-                    {course.status}
+                  <span className={`rounded-md px-2.5 py-1 text-xs font-bold tracking-wide ${getStatusBadgeClass(course.status)}`}>
+                    {getStatusLabel(course.status)}
                   </span>
                   <span>
                     <strong className="text-foreground">{course.enrollmentCount}</strong> alunos

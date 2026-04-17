@@ -14,6 +14,15 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === 'true');
   const [theme, setTheme] = useState<'light' | 'dark'>(() => (localStorage.getItem(THEME_KEY) === 'dark' ? 'dark' : 'light'));
+  const studentLinks = useMemo(() => [
+    { href: '/student/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/student/courses', label: 'Meus Cursos', icon: BookOpen },
+    { href: '/courses', label: 'Catálogo', icon: GraduationCap },
+  ], []);
+  const teacherLinks = useMemo(() => [
+    { href: '/teacher/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/teacher/courses', label: 'Gerenciar Cursos', icon: FileVideo },
+  ], []);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
@@ -31,17 +40,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   if (!user || isResolvingSession) {
     return null;
   }
-
-  const studentLinks = useMemo(() => [
-    { href: '/student/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/student/courses', label: 'Meus Cursos', icon: BookOpen },
-    { href: '/courses', label: 'Catálogo', icon: GraduationCap },
-  ], []);
-
-  const teacherLinks = useMemo(() => [
-    { href: '/teacher/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/teacher/courses', label: 'Gerenciar Cursos', icon: FileVideo },
-  ], []);
 
   const links = user.role === 'TEACHER' ? teacherLinks : studentLinks;
   const handleLogout = () => {

@@ -63,6 +63,7 @@ export function ProfileAccessSection({
                     value={values.name}
                     onChange={(e) => onValueChange("name", e.target.value)}
                     aria-invalid={Boolean(errors.name)}
+                    className="bg-background"
                   />
                   {errors.name ? <p className="text-xs text-destructive">{errors.name}</p> : null}
                 </div>
@@ -70,7 +71,7 @@ export function ProfileAccessSection({
                   <label htmlFor="profile-email" className="text-sm font-medium">
                     E-mail
                   </label>
-                  <Input id="profile-email" value={email} disabled />
+                  <Input id="profile-email" value={email} disabled className="bg-background text-foreground disabled:opacity-100" />
                 </div>
               </div>
 
@@ -86,6 +87,7 @@ export function ProfileAccessSection({
                     inputMode="numeric"
                     placeholder="(11) 99999-9999"
                     aria-invalid={Boolean(errors.phone)}
+                    className="bg-background"
                   />
                   {errors.phone ? <p className="text-xs text-destructive">{errors.phone}</p> : null}
                 </div>
@@ -100,6 +102,7 @@ export function ProfileAccessSection({
                     inputMode="numeric"
                     placeholder="000.000.000-00"
                     aria-invalid={Boolean(errors.cpf)}
+                    className="bg-background"
                   />
                   {errors.cpf ? <p className="text-xs text-destructive">{errors.cpf}</p> : null}
                 </div>
@@ -131,7 +134,7 @@ export function ProfileAccessSection({
                   id="profile-bio"
                   value={values.bio}
                   onChange={(e) => onValueChange("bio", e.target.value)}
-                  className="min-h-28 resize-y"
+                  className="min-h-28 resize-y bg-background"
                   placeholder="Descreva sua atuação, experiência e objetivos."
                   maxLength={600}
                 />

@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { useParams, Link } from 'wouter';
+import React from 'react';
+import { useParams, Link, useLocation } from 'wouter';
 import { useStudentLesson, useMarkLessonProgress } from '@/hooks/use-student';
 import { usePublicCourse } from '@/hooks/use-courses';
 import type { LessonWithProgress } from '@/types/api';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { ChevronLeft, CheckCircle2, PlayCircle, FileText, Loader2 } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, PlayCircle, FileText, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { resolveApiUrl } from '@/lib/axios';
@@ -105,6 +105,7 @@ function LessonVideoPanel({ lesson, loading }: { lesson: LessonWithProgress; loa
 // PÁGINA DE VISUALIZAÇÃO DA AULA - PÁGINA PARA VISUALIZAR UMA AULA
 export default function LessonViewer() {
   const { courseId, lessonId } = useParams<{courseId: string, lessonId: string}>();
+  const [, setLocation] = useLocation();
   
   const { data: course } = usePublicCourse(courseId);
   
@@ -119,6 +120,10 @@ export default function LessonViewer() {
   const showLessonLoading = useDelayedFlag(isLoading);
   const markProgress = useMarkLessonProgress();
   const { toast } = useToast();
+
+  const handleGoBack = () => {
+    setLocation('/student/courses');
+  };
 
   const handleComplete = async () => {
     try {
@@ -194,11 +199,17 @@ export default function LessonViewer() {
         {/* Lista de aulas: abaixo no mobile, à esquerda no desktop */}
         <aside className="order-2 flex max-h-[min(42vh,20rem)] w-full shrink-0 flex-col overflow-hidden rounded-xl border border-border bg-card lg:order-1 lg:max-h-none lg:h-auto lg:max-h-[min(100%,calc(100dvh-5rem))] lg:w-80">
           <div className="shrink-0 border-b border-border bg-muted/50 p-3 sm:p-4">
-            <Link href="/student/courses">
-              <Button variant="ghost" size="sm" className="-ml-2 mb-1 text-muted-foreground sm:mb-2">
-                <ChevronLeft className="mr-1 h-4 w-4" aria-hidden /> Voltar
-              </Button>
-            </Link>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="mb-1 h-8 w-8 rounded-full bg-slate-700 text-white hover:bg-slate-800 sm:mb-2"
+              onClick={handleGoBack}
+              aria-label="Voltar"
+              title="Voltar"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+            </Button>
             <h3 className="line-clamp-2 font-display text-sm font-bold text-foreground sm:text-base">{course.title}</h3>
           </div>
           <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-y-contain p-2 sm:space-y-4">

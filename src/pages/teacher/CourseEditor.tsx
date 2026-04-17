@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useParams } from 'wouter';
+import { useLocation, useParams } from 'wouter';
 import {
   useTeacherCourse,
   useUpdateCourse,
@@ -25,7 +25,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { CourseEditorSkeleton } from '@/components/ui/content-skeletons';
 import { useForm } from 'react-hook-form';
-import { Plus, Video, FileQuestion, GripVertical, Upload, Trash2, ImagePlus, BookCheck, Save, Info } from 'lucide-react';
+import { Plus, Video, FileQuestion, GripVertical, Upload, Trash2, ImagePlus, BookCheck, Save, Info, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { CreateLessonModal, CreateModuleModal } from '@/components/course-management/create-entity-modals';
 import {
@@ -503,6 +503,7 @@ const courseInfoSchema = z.object({
 // PÁGINA DE EDITOR DE CURSO - PÁGINA PARA EDITAR UM CURSO
 export default function CourseEditor() {
   const { id } = useParams<{ id: string }>();
+  const [, setLocation] = useLocation();
   const { data: course, isLoading, isError, error, refetch, isRefetching } = useTeacherCourse(id!);
   const showLoading = useDelayedFlag(isLoading);
   const updateCourse = useUpdateCourse();
@@ -621,6 +622,13 @@ export default function CourseEditor() {
     setSelectedModuleIdForLesson(moduleId);
     setIsLessonModalOpen(true);
   };
+  const handleGoBack = () => {
+    if (window.history.length > 1) {
+      window.history.back();
+      return;
+    }
+    setLocation('/teacher/courses');
+  };
 
   if (isLoading && !course) {
     if (!showLoading) return <AppLayout><div className="min-h-24" /></AppLayout>;
@@ -720,6 +728,17 @@ export default function CourseEditor() {
       <div className="mx-auto max-w-[92rem] min-w-0 space-y-6">
         <div className="flex flex-col gap-3 border-b pb-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="min-w-0">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="mb-2 h-10 w-10 rounded-full bg-slate-700 text-white hover:bg-slate-800"
+              onClick={handleGoBack}
+              aria-label="Voltar"
+              title="Voltar"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
             <p className="mb-1 text-sm font-bold uppercase tracking-wider text-muted-foreground">Editor de Curso</p>
             <h1 className="font-display text-xl font-bold sm:text-2xl md:text-3xl">{course.title}</h1>
           </div>
@@ -737,7 +756,7 @@ export default function CourseEditor() {
           </Button>
         </div>
 
-        <div className="-mx-1 flex gap-1 overflow-x-auto border-b pb-px sm:mx-0 sm:gap-2 sm:overflow-visible">
+        <div className="flex gap-1 border-b pb-px sm:gap-2">
           <button
             type="button"
             className={`shrink-0 whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-medium touch-manipulation sm:px-4 ${activeTab === 'info' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
@@ -766,116 +785,134 @@ export default function CourseEditor() {
                   onChange={handleCoverChange}
                 />
 
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Título *</label>
-                    <Input {...form.register('title')} />
-                    {form.formState.errors.title ? (
-                      <p className="text-xs font-medium text-destructive">{form.formState.errors.title.message}</p>
-                    ) : null}
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Subtítulo</label>
-                    <Input {...form.register('subtitle')} />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Especialidade *</label>
-                    <Select
-                      value={form.watch('specialty') || undefined}
-                      onValueChange={(value) => form.setValue('specialty', value, { shouldValidate: true })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione uma especialidade" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {MEDICAL_SPECIALTIES.map((option) => (
-                          <SelectItem key={option} value={option}>
-                            {option}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {form.formState.errors.specialty ? (
-                      <p className="text-xs font-medium text-destructive">{form.formState.errors.specialty.message}</p>
-                    ) : null}
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Nível *</label>
-                    <Select
-                      value={form.watch('level')}
-                      onValueChange={(value) => form.setValue('level', value as CourseInfoForm['level'], { shouldValidate: true })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="BASIC">Básico</SelectItem>
-                        <SelectItem value="INTERMEDIATE">Intermediário</SelectItem>
-                        <SelectItem value="ADVANCED">Avançado</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Carga horária (horas)</label>
-                    <Input type="number" min={1} {...form.register('workloadHours')} />
-                    {form.formState.errors.workloadHours ? (
-                      <p className="text-xs font-medium text-destructive">{form.formState.errors.workloadHours.message}</p>
-                    ) : null}
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Tags</label>
-                    <Input {...form.register('tags')} placeholder="cardio, urgência, internato" />
-                    <p className="text-xs text-muted-foreground">Separe as tags por vírgula.</p>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Descrição curta *</label>
-                  <Input {...form.register('shortDescription')} />
-                  {form.formState.errors.shortDescription ? (
-                    <p className="text-xs font-medium text-destructive">{form.formState.errors.shortDescription.message}</p>
-                  ) : null}
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Descrição Completa</label>
-                  <textarea
-                    {...form.register('description')}
-                    className="min-h-32 w-full resize-y rounded-md border border-input bg-background p-3 text-base md:text-sm"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Capa do curso</label>
-                  <div className="space-y-2 rounded-lg border border-border/70 p-3">
-                    {form.watch('coverImageUrl') ? (
-                      <div className="overflow-hidden rounded-md border border-border/70 bg-muted">
-                        <img
-                          src={form.watch('coverImageUrl')}
-                          alt="Pré-visualização da capa"
-                          className="h-40 w-full object-cover"
-                        />
+                <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_20rem]">
+                  <div className="order-2 space-y-4 xl:order-1">
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Título *</label>
+                        <Input {...form.register('title')} />
+                        {form.formState.errors.title ? (
+                          <p className="text-xs font-medium text-destructive">{form.formState.errors.title.message}</p>
+                        ) : null}
                       </div>
-                    ) : (
-                      <div className="flex h-28 items-center justify-center rounded-md border border-dashed border-border bg-muted/40 text-sm text-muted-foreground">
-                        Nenhuma imagem selecionada
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Subtítulo</label>
+                        <Input {...form.register('subtitle')} />
                       </div>
-                    )}
-                    <div className="flex flex-wrap gap-2">
-                      <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
-                        <ImagePlus className="mr-2 h-4 w-4" />
-                        {form.watch('coverImageUrl') ? 'Trocar imagem' : 'Selecionar imagem'}
-                      </Button>
-                      {form.watch('coverImageUrl') ? (
-                        <Button type="button" variant="ghost" size="sm" onClick={handleRemoveCover}>
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Remover
-                        </Button>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Especialidade *</label>
+                        <Select
+                          value={form.watch('specialty') || undefined}
+                          onValueChange={(value) => form.setValue('specialty', value, { shouldValidate: true })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione uma especialidade" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {MEDICAL_SPECIALTIES.map((option) => (
+                              <SelectItem key={option} value={option}>
+                                {option}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {form.formState.errors.specialty ? (
+                          <p className="text-xs font-medium text-destructive">{form.formState.errors.specialty.message}</p>
+                        ) : null}
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Nível *</label>
+                        <Select
+                          value={form.watch('level')}
+                          onValueChange={(value) => form.setValue('level', value as CourseInfoForm['level'], { shouldValidate: true })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="BASIC">Básico</SelectItem>
+                            <SelectItem value="INTERMEDIATE">Intermediário</SelectItem>
+                            <SelectItem value="ADVANCED">Avançado</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Carga horária (horas)</label>
+                        <Input type="number" min={1} {...form.register('workloadHours')} />
+                        {form.formState.errors.workloadHours ? (
+                          <p className="text-xs font-medium text-destructive">{form.formState.errors.workloadHours.message}</p>
+                        ) : null}
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Tags</label>
+                        <Input {...form.register('tags')} placeholder="cardio, urgência, internato" />
+                        <p className="text-xs text-muted-foreground">Separe as tags por vírgula.</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Descrição curta *</label>
+                      <Input {...form.register('shortDescription')} />
+                      {form.formState.errors.shortDescription ? (
+                        <p className="text-xs font-medium text-destructive">{form.formState.errors.shortDescription.message}</p>
                       ) : null}
                     </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Descrição Completa</label>
+                      <textarea
+                        {...form.register('description')}
+                        className="min-h-32 w-full resize-y rounded-md border border-input bg-background p-3 text-base md:text-sm"
+                      />
+                    </div>
                   </div>
-                  {coverUploadError ? <p className="text-xs font-medium text-destructive">{coverUploadError}</p> : null}
-                  <p className="text-xs text-muted-foreground">Formatos aceitos: JPEG, PNG, WebP ou GIF (até 3 MB).</p>
+
+                  <Card className="order-1 h-fit xl:order-2">
+                    <CardContent className="space-y-3 pt-6">
+                      <p className="text-sm font-medium">Capa do curso</p>
+                      <div className="space-y-2 rounded-lg border border-border/70 p-3">
+                        {form.watch('coverImageUrl') ? (
+                          <div className="overflow-hidden rounded-md border border-border/70 bg-muted">
+                            <img
+                              src={form.watch('coverImageUrl')}
+                              alt="Pré-visualização da capa"
+                              className="h-40 w-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="flex h-28 items-center justify-center rounded-md border border-dashed border-border bg-muted/40 text-sm text-muted-foreground">
+                            Nenhuma imagem selecionada
+                          </div>
+                        )}
+                        <div className="flex flex-wrap justify-center gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="border-primary/40 bg-primary/10 text-primary hover:border-primary/60 hover:bg-primary/20"
+                            onClick={() => fileInputRef.current?.click()}
+                          >
+                            <ImagePlus className="mr-2 h-4 w-4" />
+                            {form.watch('coverImageUrl') ? 'Trocar imagem' : 'Selecionar imagem'}
+                          </Button>
+                          {form.watch('coverImageUrl') ? (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="border-destructive/50 bg-destructive/10 text-destructive hover:border-destructive/70 hover:bg-destructive/20"
+                              onClick={handleRemoveCover}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Remover
+                            </Button>
+                          ) : null}
+                        </div>
+                      </div>
+                      {coverUploadError ? <p className="text-xs font-medium text-destructive">{coverUploadError}</p> : null}
+                      <p className="text-xs text-muted-foreground">Formatos aceitos: JPEG, PNG, WebP ou GIF (até 3 MB).</p>
+                    </CardContent>
+                  </Card>
                 </div>
 
                 <Button type="submit" isLoading={updateCourse.isPending}>

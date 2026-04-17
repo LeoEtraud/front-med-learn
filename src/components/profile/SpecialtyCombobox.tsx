@@ -34,8 +34,10 @@ export function SpecialtyCombobox({
           aria-expanded={open}
           disabled={disabled}
           className={cn(
-            "h-11 w-full justify-between px-3 py-2 text-left text-sm font-normal sm:h-9",
-            !value ? "text-muted-foreground" : "text-foreground",
+            "h-11 w-full justify-between bg-background px-3 py-2 text-left text-sm font-normal shadow-sm ring-offset-background hover:bg-background sm:h-9",
+            !value
+              ? "text-muted-foreground hover:text-muted-foreground"
+              : "text-foreground hover:text-foreground",
           )}
         >
           <span className="truncate">{value || placeholder}</span>

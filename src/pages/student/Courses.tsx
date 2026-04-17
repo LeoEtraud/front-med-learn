@@ -5,9 +5,16 @@ import { useStudentEnrollments } from '@/hooks/use-student';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Clock3, PlayCircle, BookOpen } from 'lucide-react';
+import { Clock3, PlayCircle, FileText } from 'lucide-react';
 import { useDelayedFlag } from '@/hooks/use-delayed-flag';
-import { CourseCardGridSkeleton } from '@/components/ui/content-skeletons';
+import { StudentCoursesGridSkeleton } from '@/components/ui/content-skeletons';
+
+const levelLabel: Record<string, string> = {
+  BASIC: 'Básico',
+  BEGINNER: 'Básico',
+  INTERMEDIATE: 'Intermediário',
+  ADVANCED: 'Avançado',
+};
 
 export default function StudentCourses() {
   const { data: enrollments, isLoading } = useStudentEnrollments();
@@ -17,7 +24,14 @@ export default function StudentCourses() {
     return (
       <AppLayout>
         <div className="mx-auto max-w-[92rem] min-w-0 space-y-6">
-          <CourseCardGridSkeleton />
+          <div className="flex flex-col gap-2">
+            <p className="mb-1 text-sm font-bold uppercase tracking-wider text-muted-foreground">Estudante</p>
+            <div className="inline-flex w-fit flex-col gap-2">
+              <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">Meus Cursos</h1>
+              <div className="h-1 w-full rounded-full bg-primary/80" />
+            </div>
+          </div>
+          <StudentCoursesGridSkeleton count={4} />
         </div>
       </AppLayout>
     );
@@ -30,28 +44,31 @@ export default function StudentCourses() {
     <AppLayout>
       <div className="mx-auto max-w-[92rem] min-w-0 space-y-6">
         <div className="flex flex-col gap-2">
-          <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Estudante</p>
-          <h1 className="font-display text-2xl font-bold sm:text-3xl">Meus Cursos</h1>
+          <p className="mb-1 text-sm font-bold uppercase tracking-wider text-muted-foreground">Estudante</p>
+          <div className="inline-flex w-fit flex-col gap-2">
+            <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">Meus Cursos</h1>
+            <div className="h-1 w-full rounded-full bg-primary/80" />
+          </div>
         </div>
 
         {enrollments.length === 0 ? (
-          <Card className="border-dashed">
-            <CardContent className="p-8 text-center text-muted-foreground">
-              Você ainda não está inscrito em nenhum curso.
-              <div className="mt-4">
-                <Link href="/courses">
-                  <Button variant="outline">Explorar Catálogo</Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="rounded-xl border border-dashed border-border bg-card py-16 text-center sm:py-20">
+            <h3 className="mb-2 text-lg font-bold text-foreground sm:text-xl">Você ainda não está inscrito em nenhum curso</h3>
+            <p className="mb-6 text-sm text-muted-foreground sm:text-base">Explore o catálogo e comece a aprender.</p>
+            <Link href="/courses">
+              <Button variant="outline">Explorar catálogo</Button>
+            </Link>
+          </div>
         ) : (
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {enrollments.map((enrollment) => (
-              <Card key={enrollment.id} className="overflow-hidden">
-                <div className="relative aspect-video w-full bg-slate-100">
-                  <div className="absolute inset-0 flex items-center justify-center text-slate-400">
-                    <BookOpen className="h-8 w-8" />
+              <Card
+                key={enrollment.id}
+                className="flex h-full flex-col overflow-hidden border-border/70 bg-card shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
+              >
+                <div className="relative aspect-video w-full bg-muted">
+                  <div className="absolute inset-0 flex h-full w-full items-center justify-center text-muted-foreground">
+                    <FileText className="h-8 w-8" />
                   </div>
                   {enrollment.course.coverImageUrl ? (
                     <img
@@ -65,12 +82,31 @@ export default function StudentCourses() {
                   ) : null}
                 </div>
 
-                <CardContent className="space-y-4 p-5">
-                  <div>
-                    <h3 className="line-clamp-2 text-lg font-bold">{enrollment.course.title}</h3>
-                    <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-                      {enrollment.course.shortDescription || enrollment.course.subtitle || 'Sem descrição resumida.'}
-                    </p>
+                <CardContent className="flex h-full flex-col gap-3 p-3 sm:gap-3.5 sm:p-4 xl:gap-3 xl:p-3 2xl:gap-3.5 2xl:p-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="line-clamp-1 text-[11px] font-semibold uppercase tracking-wide text-primary sm:text-xs">
+                      {enrollment.course.specialty || 'Especialidade não informada'}
+                    </span>
+                    <span className="shrink-0 rounded-full border border-border/60 bg-muted/60 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground sm:text-xs">
+                      {Math.round(enrollment.progressPercent)}%
+                    </span>
+                  </div>
+
+                  <h3 className="line-clamp-2 text-base font-bold text-card-foreground sm:text-lg xl:text-base 2xl:text-lg">
+                    {enrollment.course.title}
+                  </h3>
+                  <p className="line-clamp-2 text-xs leading-snug text-muted-foreground sm:text-sm xl:text-xs 2xl:text-sm">
+                    {enrollment.course.shortDescription || enrollment.course.subtitle || 'Sem descrição resumida.'}
+                  </p>
+
+                  <div className="flex items-center justify-between border-t border-border/80 pt-2.5 text-xs text-muted-foreground sm:pt-3 sm:text-sm">
+                    <div className="flex items-center gap-1">
+                      <Clock3 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                      {enrollment.course.workloadHours ? `${enrollment.course.workloadHours}h` : '--'}
+                    </div>
+                    <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground sm:text-xs">
+                      {levelLabel[enrollment.course.level] ?? enrollment.course.level}
+                    </div>
                   </div>
 
                   <div className="space-y-1">
@@ -81,20 +117,14 @@ export default function StudentCourses() {
                     <Progress value={enrollment.progressPercent} className="h-2" />
                   </div>
 
-                  <div className="flex items-center justify-between border-t border-border/70 pt-3 text-xs text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <Clock3 className="h-4 w-4" />
-                      {enrollment.course.workloadHours ? `${enrollment.course.workloadHours}h` : '--'}
-                    </div>
-                    <span className="font-semibold uppercase">{enrollment.course.level}</span>
+                  <div className="mt-auto pt-1">
+                    <Link href={`/student/courses/${enrollment.courseId}/lessons/${enrollment.lastLessonId || 'start'}`} className="block">
+                      <Button className="w-full text-xs sm:text-sm" size="sm">
+                        <PlayCircle className="mr-1.5 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4" />
+                        {enrollment.lastLessonId ? 'Continuar curso' : 'Iniciar curso'}
+                      </Button>
+                    </Link>
                   </div>
-
-                  <Link href={`/student/courses/${enrollment.courseId}/lessons/${enrollment.lastLessonId || 'start'}`}>
-                    <Button className="w-full">
-                      <PlayCircle className="mr-2 h-4 w-4" />
-                      {enrollment.lastLessonId ? 'Continuar curso' : 'Iniciar curso'}
-                    </Button>
-                  </Link>
                 </CardContent>
               </Card>
             ))}
