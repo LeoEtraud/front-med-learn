@@ -1,12 +1,12 @@
 import React from 'react';
-import { useParams, Link, useLocation } from 'wouter';
+import { useParams, useLocation } from 'wouter';
 import { usePublicCourse } from '@/hooks/use-courses';
 import { useAuth } from '@/hooks/use-auth';
 import { useEnrollInCourse } from '@/hooks/use-student';
-import { Clock, PlayCircle, ShieldCheck, CheckCircle2, ChevronDown, User } from 'lucide-react';
+import { Clock, PlayCircle, ShieldCheck, ChevronDown, User, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { useDelayedFlag } from '@/hooks/use-delayed-flag';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -19,6 +19,14 @@ export default function CourseDetail() {
   const { user } = useAuth();
   const enroll = useEnrollInCourse();
   const { toast } = useToast();
+
+  const handleGoBack = () => {
+    if (typeof window !== 'undefined' && window.history.length > 1) {
+      window.history.back();
+      return;
+    }
+    setLocation('/courses');
+  };
 
   const handleEnroll = async () => {
     if (!user) {
@@ -96,13 +104,26 @@ export default function CourseDetail() {
         </div>
         <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-8 px-4 sm:px-6 md:grid-cols-3 md:gap-10 lg:px-8">
           <div className="min-w-0 md:col-span-2">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="mb-3 h-8 w-8 rounded-full bg-slate-700 text-white hover:bg-slate-800 sm:mb-4"
+              onClick={handleGoBack}
+              aria-label="Voltar"
+              title="Voltar"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+            </Button>
             <div className="mb-3 flex flex-wrap gap-2 sm:mb-4">
               <Badge variant="outline" className="border-white/30 text-white">
                 {course.specialty}
               </Badge>
               <Badge className="bg-primary/20 text-blue-200 hover:bg-primary/30">{course.level}</Badge>
             </div>
-            <h1 className="mb-3 font-display text-2xl font-bold sm:mb-4 sm:text-3xl md:text-4xl lg:text-5xl">{course.title}</h1>
+            <h1 className="mb-3 font-display text-2xl font-bold text-white sm:mb-4 sm:text-3xl md:text-4xl lg:text-5xl">
+              {course.title}
+            </h1>
             <p className="mb-5 text-base leading-relaxed text-slate-300 sm:mb-6 sm:text-lg md:text-xl">{course.subtitle}</p>
 
             <ul className="flex flex-col gap-3 text-sm text-slate-300 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-6 sm:gap-y-2">
@@ -114,7 +135,7 @@ export default function CourseDetail() {
                 <Clock className="h-5 w-5 shrink-0" aria-hidden /> {course.workloadHours} horas
               </li>
               <li className="flex items-center gap-2">
-                <ShieldCheck className="h-5 w-5 shrink-0" aria-hidden /> Certificado Incluso
+                <ShieldCheck className="h-5 w-5 shrink-0" aria-hidden /> Certificado incluso
               </li>
             </ul>
           </div>

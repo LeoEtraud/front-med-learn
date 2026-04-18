@@ -45,7 +45,7 @@ export function Sidebar({
             onClick={() => setTermsOpen(true)}
             className="block w-full text-center text-xs font-medium text-primary transition-colors hover:text-primary/90"
           >
-            Termos de Uso
+            Termos de Uso e Privacidade
           </button>
           <p className="text-center text-xs font-medium text-muted-foreground">Versão {APP_VERSION}</p>
         </div>

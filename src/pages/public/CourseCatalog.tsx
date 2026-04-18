@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { usePublicCourses } from '@/hooks/use-courses';
-import { Link } from 'wouter';
-import { Search, Clock, GraduationCap, ChevronRight, BookOpen } from 'lucide-react';
+import { Link, useLocation } from 'wouter';
+import { Search, Clock, GraduationCap, ChevronRight, BookOpen, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -13,6 +13,7 @@ import { CourseCardGridSkeleton } from '@/components/ui/content-skeletons';
 const specialties = ['Cardiologia', 'Neurologia', 'Pediatria', 'Cirurgia', 'Clínica Médica'];
 
 export default function CourseCatalog() {
+  const [, setLocation] = useLocation();
   const [search, setSearch] = useState('');
   const [specialty, setSpecialty] = useState('');
   const debouncedSearch = useDebouncedValue(search.trim(), 350);
@@ -20,11 +21,32 @@ export default function CourseCatalog() {
   const { data, isLoading } = usePublicCourses({ search: debouncedSearch, specialty });
   const showLoading = useDelayedFlag(isLoading);
 
+  const handleGoBack = () => {
+    if (typeof window !== 'undefined' && window.history.length > 1) {
+      window.history.back();
+      return;
+    }
+    setLocation('/');
+  };
+
   return (
     <div className="min-h-dvh overflow-x-hidden bg-slate-50">
       <div className="bg-sidebar py-12 text-white sm:py-14 md:py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h1 className="mb-3 font-display text-2xl font-bold sm:mb-4 sm:text-3xl md:text-4xl">Catálogo de Cursos</h1>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="mb-3 h-8 w-8 rounded-full bg-slate-700 text-white hover:bg-slate-800 sm:mb-4"
+            onClick={handleGoBack}
+            aria-label="Voltar"
+            title="Voltar"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+          </Button>
+          <h1 className="mb-3 font-display text-2xl font-bold text-white sm:mb-4 sm:text-3xl md:text-4xl">
+            Catálogo de Cursos
+          </h1>
           <p className="max-w-2xl text-sm leading-relaxed text-slate-300 sm:text-base md:text-lg">
             Encontre a especialização ideal para sua carreira médica. Filtre por especialidade ou busque diretamente.
           </p>
