@@ -35,7 +35,7 @@ function toYoutubeEmbed(url: string): string | null {
 function LessonVideoPanel({ lesson, loading }: { lesson: LessonWithProgress; loading?: boolean }) {
   if (loading) {
     return (
-      <div className="relative aspect-video w-full shrink-0 border-b bg-black/85">
+      <div className="relative aspect-video w-full shrink-0 bg-black/85">
         <div className="absolute inset-0 flex items-center justify-center">
           <Loader2 className="h-10 w-10 animate-spin text-white/80" />
         </div>
@@ -44,7 +44,7 @@ function LessonVideoPanel({ lesson, loading }: { lesson: LessonWithProgress; loa
   }
 
   const placeholder = (
-    <div className="relative flex aspect-video w-full shrink-0 items-center justify-center border-b border-border bg-muted">
+    <div className="relative flex aspect-video w-full shrink-0 items-center justify-center bg-muted">
       <FileText className="h-16 w-16 text-muted-foreground/50" />
     </div>
   );
@@ -152,13 +152,13 @@ export default function LessonViewer() {
   return (
     <AppLayout>
       <div className="flex w-full min-w-0 flex-col gap-4 lg:min-h-[min(100%,calc(100dvh-5rem))] lg:flex-row lg:gap-6">
-        {/* Conteúdo principal: primeiro no mobile (vídeo + texto) */}
-        <div className="order-1 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-card text-card-foreground lg:order-2 lg:min-h-[min(100%,calc(100dvh-5rem))]">
+        {/* Principal: no mobile fica abaixo da lista de módulos; no desktop à direita */}
+        <div className="order-2 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-card text-card-foreground lg:order-2 lg:min-h-[min(100%,calc(100dvh-5rem))]">
           <div className="shrink-0 overflow-hidden rounded-t-xl">
             <LessonVideoPanel lesson={lesson} loading={isLessonSwitching} />
           </div>
 
-          <div className="min-h-0 flex-1 rounded-b-xl p-4 sm:p-6 md:p-8 lg:overflow-y-auto">
+          <div className="min-h-0 flex-1 rounded-b-xl border-t border-border p-4 sm:p-6 md:p-8 lg:overflow-y-auto">
             <div className="mb-5 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
               <div className="min-w-0 text-card-foreground">
                 <h1 className="mb-1 font-display text-xl font-bold text-card-foreground sm:text-2xl">{lesson.title}</h1>
@@ -196,8 +196,8 @@ export default function LessonViewer() {
           </div>
         </div>
 
-        {/* Lista de aulas: abaixo no mobile, à esquerda no desktop */}
-        <aside className="order-2 flex max-h-[min(42vh,20rem)] w-full shrink-0 flex-col overflow-hidden rounded-xl border border-border bg-card lg:order-1 lg:max-h-none lg:h-auto lg:max-h-[min(100%,calc(100dvh-5rem))] lg:w-80">
+        {/* Lista de módulos/aulas: no topo no mobile, à esquerda no desktop */}
+        <aside className="order-1 flex max-h-[min(42vh,20rem)] w-full shrink-0 flex-col overflow-hidden rounded-xl border border-border bg-card lg:order-1 lg:max-h-none lg:h-auto lg:max-h-[min(100%,calc(100dvh-5rem))] lg:w-80">
           <div className="shrink-0 border-b border-border bg-muted/50 p-3 sm:p-4">
             <Button
               type="button"
