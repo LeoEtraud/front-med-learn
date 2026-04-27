@@ -11,6 +11,12 @@ import { useDelayedFlag } from '@/hooks/use-delayed-flag';
 import { CourseCardGridSkeleton } from '@/components/ui/content-skeletons';
 
 const specialties = ['Cardiologia', 'Neurologia', 'Pediatria', 'Cirurgia', 'Clínica Médica'];
+const levelLabel: Record<string, string> = {
+  BASIC: 'Básico',
+  BEGINNER: 'Básico',
+  INTERMEDIATE: 'Intermediário',
+  ADVANCED: 'Avançado',
+};
 
 export default function CourseCatalog() {
   const [, setLocation] = useLocation();
@@ -104,10 +110,16 @@ export default function CourseCatalog() {
                       }}
                     />
                   ) : null}
-                  <Badge className="absolute top-3 right-3 bg-white/90 text-primary hover:bg-white">{course.level}</Badge>
+                  <Badge className="absolute top-3 right-3 bg-white/90 text-primary hover:bg-white">
+                    {levelLabel[course.level] ?? course.level}
+                  </Badge>
                 </div>
                 <CardContent className="p-6 flex flex-col flex-1">
-                  <div className="text-sm text-accent font-semibold mb-2">{course.specialty || 'Geral'}</div>
+                  <div className="mt-3 mb-2 flex items-start justify-between gap-2">
+                    <span className="line-clamp-1 text-[11px] font-semibold uppercase tracking-wide text-primary sm:text-xs">
+                      {course.specialty || 'Geral'}
+                    </span>
+                  </div>
                   <h3 className="text-xl font-bold mb-2 line-clamp-2">{course.title}</h3>
                   <p className="text-slate-600 text-sm mb-6 line-clamp-2 flex-1">{course.shortDescription || course.subtitle}</p>
                   
