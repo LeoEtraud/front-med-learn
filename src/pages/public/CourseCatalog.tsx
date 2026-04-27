@@ -18,6 +18,17 @@ const levelLabel: Record<string, string> = {
   ADVANCED: 'Avançado',
 };
 
+function formatCourseLevel(level?: string) {
+  if (!level) return '';
+
+  const normalized = level.trim().toUpperCase();
+  const translated = levelLabel[normalized];
+  if (translated) return translated;
+
+  const lower = level.toLowerCase();
+  return lower.charAt(0).toUpperCase() + lower.slice(1);
+}
+
 export default function CourseCatalog() {
   const [, setLocation] = useLocation();
   const [search, setSearch] = useState('');
@@ -110,8 +121,8 @@ export default function CourseCatalog() {
                       }}
                     />
                   ) : null}
-                  <Badge className="absolute top-3 right-3 bg-white/90 text-primary hover:bg-white">
-                    {levelLabel[course.level] ?? course.level}
+                  <Badge className="absolute top-3 right-3 bg-white/90 text-primary uppercase tracking-wide hover:bg-white">
+                    {formatCourseLevel(course.level)}
                   </Badge>
                 </div>
                 <CardContent className="p-6 flex flex-col flex-1">
