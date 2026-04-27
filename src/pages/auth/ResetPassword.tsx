@@ -57,8 +57,8 @@ export default function ResetPassword() {
         </div>
         <div className="relative z-10 max-w-md text-center">
           <Stethoscope className="w-16 h-16 mx-auto mb-8 text-primary" />
-          <h2 className="text-4xl font-display font-bold mb-4">Nova senha</h2>
-          <p className="text-lg text-slate-300">Escolha uma senha forte e guarde em local seguro.</p>
+          <h2 className="text-4xl font-display font-bold mb-4 text-white">Nova senha</h2>
+          <p className="text-lg text-white">Escolha uma senha forte e guarde em local seguro.</p>
         </div>
       </div>
 

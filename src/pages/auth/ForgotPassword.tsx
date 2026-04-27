@@ -45,8 +45,8 @@ export default function ForgotPassword() {
         </div>
         <div className="relative z-10 max-w-md text-center">
           <Stethoscope className="w-16 h-16 mx-auto mb-8 text-primary" />
-          <h2 className="text-4xl font-display font-bold mb-4">Redefinir sua senha</h2>
-          <p className="text-lg text-slate-300">
+          <h2 className="text-4xl font-display font-bold mb-4 text-white">Redefinir sua senha</h2>
+          <p className="text-lg text-white">
             Informe o e-mail da sua conta e enviaremos um link seguro para você criar uma nova senha.
           </p>
         </div>
