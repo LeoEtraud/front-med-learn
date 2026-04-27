@@ -4,8 +4,6 @@ import { useLocation } from 'wouter';
 import { BookOpen, FileVideo, GraduationCap, LayoutDashboard } from 'lucide-react';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
-import { FloatingChatButton } from '@/components/chat/FloatingChatButton';
-
 const SIDEBAR_COLLAPSED_KEY = 'medlearn_sidebar_collapsed';
 const THEME_KEY = 'medlearn_theme';
 
@@ -83,8 +81,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </main>
         </div>
       </div>
-
-      <FloatingChatButton apiEndpoint="/api/chat" />
     </div>
   );
 }

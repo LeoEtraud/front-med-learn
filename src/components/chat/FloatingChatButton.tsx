@@ -1,10 +1,8 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
 import { Bot, MessageCircle, Send, User, X } from "lucide-react";
+import { useMedlearnAiChat } from "@/contexts/medlearn-ai-chat-context";
 
 type FloatingChatButtonProps = {
-  apiEndpoint?: string;
   title?: string;
 };
 
@@ -20,25 +18,13 @@ type ChatMessage = {
 };
 
 export function FloatingChatButton({
-  apiEndpoint = "/api/chat",
   title = "Assistente Med Learn",
 }: FloatingChatButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
-  const { messages, sendMessage, status, error } = useChat({
-    transport: new DefaultChatTransport({
-      api: apiEndpoint,
-      headers: () => {
-        const token = localStorage.getItem("medlearn_token");
-        if (!token) {
-          return new Headers();
-        }
-        return new Headers({ Authorization: `Bearer ${token}` });
-      },
-    }),
-  });
+  const { messages, sendMessage, status, error } = useMedlearnAiChat();
 
   const isLoading = status === "submitted" || status === "streaming";
   const typedMessages = messages as ChatMessage[];

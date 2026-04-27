@@ -2,6 +2,9 @@ import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { MedlearnAiChatProvider } from "@/contexts/medlearn-ai-chat-context";
+import { FloatingChatButton } from "@/components/chat/FloatingChatButton";
+import { useAuth } from "@/hooks/use-auth";
 import Home from "@/pages/public/Home";
 import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
@@ -30,6 +33,12 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+function AuthenticatedFloatingChat() {
+  const { user } = useAuth();
+  if (!user) return null;
+  return <FloatingChatButton />;
+}
 
 function Router() {
   return (
@@ -65,7 +74,10 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider delayDuration={300} skipDelayDuration={200}>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <Router />
+          <MedlearnAiChatProvider apiEndpoint="/api/chat">
+            <Router />
+            <AuthenticatedFloatingChat />
+          </MedlearnAiChatProvider>
         </WouterRouter>
         <Toaster />
       </TooltipProvider>
