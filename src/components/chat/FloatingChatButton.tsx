@@ -76,15 +76,15 @@ export function FloatingChatButton({
     <div className="fixed bottom-4 right-4 z-50 sm:bottom-6 sm:right-6">
       {isOpen && (
         <div className="mb-3 flex h-[70vh] w-[calc(100vw-2rem)] max-h-[620px] max-w-sm flex-col overflow-hidden rounded-2xl border border-border/70 bg-background/95 shadow-2xl backdrop-blur supports-[backdrop-filter]:bg-background/80">
-          <header className="flex items-center justify-between border-b border-border/70 px-4 py-3">
+          <header className="flex items-center justify-between border-b border-slate-600 bg-slate-700 px-4 py-3 text-white">
             <div className="flex items-center gap-2">
-              <div className="rounded-full bg-primary/10 p-2 text-primary">
+              <div className="rounded-full bg-white/15 p-2 text-white">
                 <Bot className="h-4 w-4" />
               </div>
               <div>
                 <p className="text-sm font-semibold leading-none">{title}</p>
-                <p className="text-xs text-muted-foreground">
-                  Tire suas duvidas em tempo real
+                <p className="text-xs text-white/80">
+                  Tire suas dúvidas em tempo real
                 </p>
               </div>
             </div>
@@ -92,7 +92,7 @@ export function FloatingChatButton({
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full text-white/85 transition-colors hover:bg-white/15 hover:text-white"
               aria-label="Fechar chat"
             >
               <X className="h-4 w-4" />
@@ -129,7 +129,7 @@ export function FloatingChatButton({
                         <Bot className="h-3 w-3" />
                       )}
                       <span>
-                        {message.role === "user" ? "Voce" : "Assistente"}
+                        {message.role === "user" ? "Você" : "Assistente"}
                       </span>
                     </div>
                     {message.parts.map((part: ChatMessagePart, index: number) =>
