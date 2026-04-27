@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { resolveApiUrl } from '@/lib/axios';
 import { LessonViewerSkeleton } from '@/components/ui/content-skeletons';
 import { useDelayedFlag } from '@/hooks/use-delayed-flag';
+import { normalizePtBrText } from '@/lib/normalize-ptbr';
 
 // FUNÇÃO PARA CONVERTAR O URL DO VÍDEO DO YOUTUBE PARA O EMBED
 function toYoutubeEmbed(url: string): string | null {
@@ -161,7 +162,7 @@ export default function LessonViewer() {
           <div className="min-h-0 flex-1 rounded-b-xl border-t border-border p-4 sm:p-6 md:p-8 lg:overflow-y-auto">
             <div className="mb-5 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
               <div className="min-w-0 text-card-foreground">
-                <h1 className="mb-1 font-display text-xl font-bold text-card-foreground sm:text-2xl">{lesson.title}</h1>
+                <h1 className="mb-1 font-display text-xl font-bold text-card-foreground sm:text-2xl">{normalizePtBrText(lesson.title)}</h1>
                 <p className="text-sm text-muted-foreground">Aula de Módulo</p>
               </div>
               <Button
@@ -178,7 +179,7 @@ export default function LessonViewer() {
 
             <div className="prose prose-sm max-w-none text-card-foreground/90 prose-headings:text-card-foreground prose-p:text-card-foreground/90 sm:prose-base dark:prose-invert">
               {lesson.description ? (
-                <p>{lesson.description}</p>
+                <p>{normalizePtBrText(lesson.description)}</p>
               ) : (
                 <p className="italic text-muted-foreground">Nenhuma descrição adicional para esta aula.</p>
               )}
@@ -186,7 +187,7 @@ export default function LessonViewer() {
 
             {lesson.type === 'QUIZ' && lesson.quiz && (
               <div className="mt-8 rounded-xl border border-primary/25 bg-primary/10 p-4 text-center sm:mt-10 sm:p-6">
-                <h3 className="mb-2 text-lg font-bold text-card-foreground sm:text-xl">{lesson.quiz.title}</h3>
+                <h3 className="mb-2 text-lg font-bold text-card-foreground sm:text-xl">{normalizePtBrText(lesson.quiz.title)}</h3>
                 <p className="mb-4 text-sm text-muted-foreground sm:mb-6 sm:text-base">
                   Avaliação com {lesson.quiz.questions.length} questões. Nota para passar: {lesson.quiz.passingScore}%
                 </p>
@@ -210,7 +211,7 @@ export default function LessonViewer() {
             >
               <ArrowLeft className="h-3.5 w-3.5" />
             </Button>
-            <h3 className="line-clamp-2 font-display text-sm font-bold text-foreground sm:text-base">{course.title}</h3>
+            <h3 className="line-clamp-2 font-display text-sm font-bold text-foreground sm:text-base">{normalizePtBrText(course.title)}</h3>
           </div>
           <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-y-contain p-2 sm:space-y-4">
             {course.modules?.map((mod, i) => (
@@ -230,7 +231,7 @@ export default function LessonViewer() {
                         ) : (
                           <FileText className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
                         )}
-                        <span className="line-clamp-2">{l.title}</span>
+                        <span className="line-clamp-2">{normalizePtBrText(l.title)}</span>
                       </button>
                     </Link>
                   ))}

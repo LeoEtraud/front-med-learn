@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useDelayedFlag } from '@/hooks/use-delayed-flag';
 import { CourseCardGridSkeleton } from '@/components/ui/content-skeletons';
+import { normalizePtBrText } from '@/lib/normalize-ptbr';
 
 const specialties = ['Cardiologia', 'Neurologia', 'Pediatria', 'Cirurgia', 'Clínica Médica'];
 const levelLabel: Record<string, string> = {
@@ -112,7 +113,7 @@ export default function CourseCatalog() {
                   {course.coverImageUrl ? (
                     <img
                       src={course.coverImageUrl}
-                      alt={course.title}
+                      alt={normalizePtBrText(course.title)}
                       loading="lazy"
                       decoding="async"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -131,8 +132,10 @@ export default function CourseCatalog() {
                       {course.specialty || 'Geral'}
                     </span>
                   </div>
-                  <h3 className="text-xl font-bold mb-2 line-clamp-2">{course.title}</h3>
-                  <p className="text-slate-600 text-sm mb-6 line-clamp-2 flex-1">{course.shortDescription || course.subtitle}</p>
+                  <h3 className="text-xl font-bold mb-2 line-clamp-2">{normalizePtBrText(course.title)}</h3>
+                  <p className="text-slate-600 text-sm mb-6 line-clamp-2 flex-1">
+                    {normalizePtBrText(course.shortDescription || course.subtitle)}
+                  </p>
                   
                   <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-100">
                     <div className="flex items-center gap-1 text-slate-500 text-sm">

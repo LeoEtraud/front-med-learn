@@ -10,6 +10,22 @@ import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { useDelayedFlag } from '@/hooks/use-delayed-flag';
 import { Skeleton } from '@/components/ui/skeleton';
+import { normalizePtBrText } from '@/lib/normalize-ptbr';
+
+const levelLabel: Record<string, string> = {
+  BASIC: 'Básico',
+  BEGINNER: 'Básico',
+  INTERMEDIATE: 'Intermediário',
+  ADVANCED: 'Avançado',
+};
+
+function formatCourseLevel(level?: string) {
+  if (!level) return '';
+  const normalized = level.trim().toUpperCase();
+  const translated = levelLabel[normalized];
+  if (translated) return translated;
+  return normalizePtBrText(level);
+}
 
 export default function CourseDetail() {
   const { id } = useParams<{id: string}>();
@@ -119,17 +135,19 @@ export default function CourseDetail() {
               <Badge variant="outline" className="border-white/30 text-white">
                 {course.specialty}
               </Badge>
-              <Badge className="bg-primary/20 text-blue-200 hover:bg-primary/30">{course.level}</Badge>
+              <Badge className="bg-primary/20 text-blue-200 hover:bg-primary/30">{formatCourseLevel(course.level)}</Badge>
             </div>
             <h1 className="mb-3 font-display text-2xl font-bold text-white sm:mb-4 sm:text-3xl md:text-4xl lg:text-5xl">
-              {course.title}
+              {normalizePtBrText(course.title)}
             </h1>
-            <p className="mb-5 text-base leading-relaxed text-slate-300 sm:mb-6 sm:text-lg md:text-xl">{course.subtitle}</p>
+            <p className="mb-5 text-base leading-relaxed text-slate-300 sm:mb-6 sm:text-lg md:text-xl">
+              {normalizePtBrText(course.subtitle)}
+            </p>
 
             <ul className="flex flex-col gap-3 text-sm text-slate-300 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-6 sm:gap-y-2">
               <li className="flex min-w-0 items-center gap-2">
                 <User className="h-5 w-5 shrink-0" aria-hidden />{' '}
-                <span className="truncate">Prof. {course.teacherName}</span>
+                <span className="truncate">Prof. {normalizePtBrText(course.teacherName)}</span>
               </li>
               <li className="flex items-center gap-2">
                 <Clock className="h-5 w-5 shrink-0" aria-hidden /> {course.workloadHours} horas
@@ -161,7 +179,7 @@ export default function CourseDetail() {
           <section>
             <h2 className="mb-3 font-display text-xl font-bold sm:mb-4 sm:text-2xl">Sobre o Curso</h2>
             <div className="prose prose-slate max-w-none text-slate-600">
-              <p>{course.description || course.shortDescription}</p>
+              <p>{normalizePtBrText(course.description || course.shortDescription)}</p>
             </div>
           </section>
 
@@ -175,7 +193,7 @@ export default function CourseDetail() {
                     <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4 font-semibold sm:p-5 touch-manipulation">
                       <div className="flex items-center gap-3">
                         <div className="h-8 w-8 rounded bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">{i + 1}</div>
-                        {mod.title}
+                        {normalizePtBrText(mod.title)}
                       </div>
                       <ChevronDown className="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform" />
                     </summary>
@@ -184,7 +202,7 @@ export default function CourseDetail() {
                         {mod.lessons?.map(lesson => (
                           <li key={lesson.id} className="flex items-center gap-3 text-slate-600 text-sm">
                             <PlayCircle className="w-4 h-4 text-slate-400" />
-                            {lesson.title}
+                            {normalizePtBrText(lesson.title)}
                           </li>
                         ))}
                       </ul>

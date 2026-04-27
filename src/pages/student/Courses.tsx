@@ -8,6 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { Clock3, PlayCircle, FileText } from 'lucide-react';
 import { useDelayedFlag } from '@/hooks/use-delayed-flag';
 import { StudentCoursesGridSkeleton } from '@/components/ui/content-skeletons';
+import { normalizePtBrText } from '@/lib/normalize-ptbr';
 
 const levelLabel: Record<string, string> = {
   BASIC: 'Básico',
@@ -93,10 +94,10 @@ export default function StudentCourses() {
                   </div>
 
                   <h3 className="line-clamp-2 text-base font-bold text-card-foreground sm:text-lg xl:text-base 2xl:text-lg">
-                    {enrollment.course.title}
+                    {normalizePtBrText(enrollment.course.title)}
                   </h3>
                   <p className="line-clamp-2 text-xs leading-snug text-muted-foreground sm:text-sm xl:text-xs 2xl:text-sm">
-                    {enrollment.course.shortDescription || enrollment.course.subtitle || 'Sem descrição resumida.'}
+                    {normalizePtBrText(enrollment.course.shortDescription || enrollment.course.subtitle) || 'Sem descrição resumida.'}
                   </p>
 
                   <div className="flex items-center justify-between border-t border-border/80 pt-2.5 text-xs text-muted-foreground sm:pt-3 sm:text-sm">

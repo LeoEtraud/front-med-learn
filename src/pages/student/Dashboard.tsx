@@ -8,6 +8,7 @@ import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { DashboardSkeleton } from '@/components/ui/content-skeletons';
 import { useDelayedFlag } from '@/hooks/use-delayed-flag';
+import { normalizePtBrText } from '@/lib/normalize-ptbr';
 
 // PÁGINA DE DASHBOARD DO ALUNO - PÁGINA PARA MOSTRAR O DASHBOARD DO ALUNO
 export default function StudentDashboard() {
@@ -73,9 +74,9 @@ export default function StudentDashboard() {
                     <CardContent className="flex flex-col gap-4 p-4 sm:p-5">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0 flex-1">
-                          <h4 className="mb-1 text-base font-bold sm:text-lg">{enrollment.course.title}</h4>
+                          <h4 className="mb-1 text-base font-bold sm:text-lg">{normalizePtBrText(enrollment.course.title)}</h4>
                           <p className="line-clamp-2 text-sm text-muted-foreground sm:line-clamp-1">
-                            {enrollment.lastLessonTitle || 'Iniciar curso'}
+                            {normalizePtBrText(enrollment.lastLessonTitle) || 'Iniciar curso'}
                           </p>
                         </div>
                         <Link
