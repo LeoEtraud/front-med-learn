@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { type LucideIcon, BookOpen, FileText, PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
-import { Link } from "wouter";
+import { Link } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { TermsOfUseModal } from "@/components/common/TermsOfUseModal";
 import { APP_VERSION } from "@/lib/app-version";
@@ -75,7 +75,7 @@ export function Sidebar({
           const isActive = location === item.href || location.startsWith(`${item.href}/`);
 
           const linkContent = (
-            <Link href={item.href} onClick={mobile ? onClose : undefined}>
+            <Link to={item.href} onClick={mobile ? onClose : undefined}>
               <span
                 className={cn(
                   "flex cursor-pointer items-center rounded-xl transition-colors",

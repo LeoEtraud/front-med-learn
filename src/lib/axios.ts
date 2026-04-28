@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { clearAuthTokenCookie, getAuthTokenFromCookie } from '@/lib/auth-cookie';
 
 /** Em dev, o Vite faz proxy de `/api` → `VITE_API_ORIGIN`. Em produção (Vercel), use `VITE_API_ORIGIN` com a URL do backend (ex.: https://seu-app.onrender.com). */
 function getApiBaseUrl(): string {
@@ -27,13 +28,14 @@ export function resolveApiUrl(path: string): string {
 // Create a custom axios instance to reliably inject the token
 export const api = axios.create({
   baseURL: getApiBaseUrl(),
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('medlearn_token');
+  const token = getAuthTokenFromCookie();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -45,7 +47,7 @@ api.interceptors.response.use(
   (error) => {
     // Global 401 handler
     if (error.response?.status === 401) {
-      localStorage.removeItem('medlearn_token');
+      clearAuthTokenCookie();
       // Only redirect if we're not already on a public auth page
       if (!window.location.pathname.match(/^\/(login|register|forgot-password|reset-password)$/)) {
         window.location.href = '/login';

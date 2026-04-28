@@ -1,5 +1,5 @@
 import { ChevronDown, LogOut, Menu, Moon, Sun, User } from "lucide-react";
-import { useLocation } from "wouter";
+import { useNavigate } from "react-router-dom";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,7 +39,7 @@ function roleLabel(role: UserProfile["role"]) {
 }
 
 export function Header({ user, location, theme, onMenuToggle, onToggleTheme, onLogout }: HeaderProps) {
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
   const shortName = displayFirstLastName(user.name);
   const firstLetter = shortName?.charAt(0)?.toUpperCase() || user.name?.charAt(0)?.toUpperCase() || "U";
   const profileHref = user.role === "TEACHER" ? "/teacher/profile" : "/student/profile";
@@ -118,7 +118,7 @@ export function Header({ user, location, theme, onMenuToggle, onToggleTheme, onL
             >
               <DropdownMenuItem
                 className="h-10 cursor-pointer rounded-lg px-3 text-popover-foreground focus:bg-primary/10 focus:text-foreground data-[highlighted]:bg-primary/10"
-                onSelect={() => setLocation(profileHref)}
+                onSelect={() => navigate(profileHref)}
               >
                 <User className="mr-2 h-4 w-4 shrink-0 text-primary" />
                 Perfil do usuário

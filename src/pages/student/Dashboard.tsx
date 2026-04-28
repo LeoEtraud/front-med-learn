@@ -4,7 +4,7 @@ import { useStudentDashboard } from '@/hooks/use-student';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BookOpen, Award, Clock, PlayCircle } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
-import { Link } from 'wouter';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { DashboardSkeleton } from '@/components/ui/content-skeletons';
 import { useDelayedFlag } from '@/hooks/use-delayed-flag';
@@ -80,7 +80,7 @@ export default function StudentDashboard() {
                           </p>
                         </div>
                         <Link
-                          href={`/student/courses/${enrollment.courseId}/lessons/${enrollment.lastLessonId || 'start'}`}
+                          to={`/student/courses/${enrollment.courseId}/lessons/${enrollment.lastLessonId || 'start'}`}
                           className="shrink-0"
                         >
                           <Button size="icon" className="rounded-full shadow-md shadow-primary/20" aria-label="Continuar aula">
@@ -104,7 +104,7 @@ export default function StudentDashboard() {
                 <CardContent className="p-8 text-center text-muted-foreground">
                   Você ainda não está inscrito em nenhum curso.
                   <div className="mt-4">
-                    <Link href="/courses"><Button variant="outline">Explorar Catálogo</Button></Link>
+                    <Link to="/courses"><Button variant="outline">Explorar Catálogo</Button></Link>
                   </div>
                 </CardContent>
               </Card>

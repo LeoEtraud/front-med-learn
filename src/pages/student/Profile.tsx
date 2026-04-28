@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { KeyRound } from 'lucide-react';
-import { useLocation } from 'wouter';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/use-auth';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,7 +22,7 @@ import { useDelayedFlag } from '@/hooks/use-delayed-flag';
 export default function StudentProfile() {
   const { toast } = useToast();
   const { user, isLoading: authLoading } = useAuth();
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
   const { data: profile, isLoading } = useStudentProfile();
   const showAuthLoading = useDelayedFlag(authLoading);
   const showProfileLoading = useDelayedFlag(isLoading);
@@ -31,9 +31,9 @@ export default function StudentProfile() {
   useEffect(() => {
     if (authLoading || !user) return;
     if (user.role !== 'STUDENT') {
-      setLocation('/teacher/dashboard');
+      navigate('/teacher/dashboard', { replace: true });
     }
-  }, [authLoading, user, setLocation]);
+  }, [authLoading, navigate, user]);
   const updateProfile = useUpdateStudentProfile();
   const updatePassword = useUpdateStudentPassword();
 

@@ -10,6 +10,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import type { UseChatHelpers, UIMessage } from "@ai-sdk/react";
 import { useAuth } from "@/hooks/use-auth";
+import { getAuthTokenFromCookie } from "@/lib/auth-cookie";
 
 const CHAT_ID = "medlearn-assistant";
 
@@ -35,7 +36,7 @@ export function MedlearnAiChatProvider({
       new DefaultChatTransport({
         api: apiEndpoint,
         headers: () => {
-          const token = localStorage.getItem("medlearn_token");
+          const token = getAuthTokenFromCookie();
           if (!token) {
             return new Headers();
           }

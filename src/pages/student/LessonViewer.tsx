@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, Link, useLocation } from 'wouter';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useStudentLesson, useMarkLessonProgress } from '@/hooks/use-student';
 import { usePublicCourse } from '@/hooks/use-courses';
 import type { LessonWithProgress } from '@/types/api';
@@ -106,12 +106,12 @@ function LessonVideoPanel({ lesson, loading }: { lesson: LessonWithProgress; loa
 // PÁGINA DE VISUALIZAÇÃO DA AULA - PÁGINA PARA VISUALIZAR UMA AULA
 export default function LessonViewer() {
   const { courseId, lessonId } = useParams<{courseId: string, lessonId: string}>();
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
   
-  const { data: course } = usePublicCourse(courseId);
+  const { data: course } = usePublicCourse(courseId ?? '');
   
   // Find actual lessonId if 'start' is passed
-  let actualLessonId = lessonId;
+  let actualLessonId = lessonId ?? '';
   if (lessonId === 'start' && course?.modules?.[0]?.lessons?.[0]) {
     actualLessonId = course.modules[0].lessons[0].id;
   }
@@ -123,7 +123,7 @@ export default function LessonViewer() {
   const { toast } = useToast();
 
   const handleGoBack = () => {
-    setLocation('/student/courses');
+    navigate('/student/courses');
   };
 
   const handleComplete = async () => {
@@ -221,7 +221,7 @@ export default function LessonViewer() {
                 </div>
                 <div className="space-y-0.5 sm:space-y-1">
                   {mod.lessons?.map((l) => (
-                    <Link key={l.id} href={`/student/courses/${course.id}/lessons/${l.id}`}>
+                    <Link key={l.id} to={`/student/courses/${course.id}/lessons/${l.id}`}>
                       <button
                         type="button"
                         className={`flex w-full min-h-11 items-start gap-2 rounded-lg px-2 py-2 text-left text-sm transition-colors touch-manipulation sm:gap-3 sm:px-3 sm:py-2.5 ${l.id === actualLessonId ? 'bg-primary/10 font-medium text-primary' : 'text-foreground/90 hover:bg-muted hover:text-foreground'}`}

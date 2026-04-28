@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'wouter';
+import { Link } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useStudentEnrollments } from '@/hooks/use-student';
 import { Card, CardContent } from '@/components/ui/card';
@@ -56,7 +56,7 @@ export default function StudentCourses() {
           <div className="rounded-xl border border-dashed border-border bg-card py-16 text-center sm:py-20">
             <h3 className="mb-2 text-lg font-bold text-foreground sm:text-xl">Você ainda não está inscrito em nenhum curso</h3>
             <p className="mb-6 text-sm text-muted-foreground sm:text-base">Explore o catálogo e comece a aprender.</p>
-            <Link href="/courses">
+            <Link to="/courses">
               <Button variant="outline">Explorar catálogo</Button>
             </Link>
           </div>
@@ -119,7 +119,7 @@ export default function StudentCourses() {
                   </div>
 
                   <div className="mt-auto pt-1">
-                    <Link href={`/student/courses/${enrollment.courseId}/lessons/${enrollment.lastLessonId || 'start'}`} className="block">
+                    <Link to={`/student/courses/${enrollment.courseId}/lessons/${enrollment.lastLessonId || 'start'}`} className="block">
                       <Button className="w-full text-xs sm:text-sm" size="sm">
                         <PlayCircle className="mr-1.5 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4" />
                         {enrollment.lastLessonId ? 'Continuar curso' : 'Iniciar curso'}

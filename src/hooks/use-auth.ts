@@ -1,79 +1,79 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api } from '@/lib/axios';
-import { UserProfile } from '@/types/api';
-import { useLocation } from 'wouter';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { api } from "@/lib/axios";
+import {
+  clearAuthTokenCookie,
+  hasAuthTokenCookie,
+  setAuthTokenCookie,
+} from "@/lib/auth-cookie";
+import { UserProfile } from "@/types/api";
 
 // FUNÇÃO PARA GERENCIAR AUTENTICAÇÃO E SESSÃO NO FRONTEND
 export function useAuth() {
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const token = localStorage.getItem('medlearn_token');
+  const hasToken = hasAuthTokenCookie();
 
   const { data: user, isLoading, error } = useQuery({
-    queryKey: ['auth', 'me'],
+    queryKey: ["auth", "me"],
     queryFn: async () => {
-      const token = localStorage.getItem('medlearn_token');
-      if (!token) return null;
       try {
-        const res = await api.get<UserProfile>('/auth/me');
+        const res = await api.get<UserProfile>("/auth/me");
         return res.data as UserProfile;
-      } catch (err) {
+      } catch {
         return null;
       }
     },
     staleTime: Infinity,
-    enabled: !!token,
-    initialData: token ? () => queryClient.getQueryData<UserProfile | null>(['auth', 'me']) ?? undefined : null,
+    enabled: hasToken,
+    initialData: hasToken
+      ? () => queryClient.getQueryData<UserProfile | null>(["auth", "me"]) ?? undefined
+      : null,
     placeholderData: (previousData) => previousData,
   });
 
   const login = useMutation({
     mutationFn: async (credentials: any) => {
-      const res = await api.post('/auth/login', credentials);
+      const res = await api.post("/auth/login", credentials);
       return res.data;
     },
     onSuccess: (data) => {
-      if (data.token) {
-        localStorage.setItem('medlearn_token', data.token);
-        queryClient.setQueryData(['auth', 'me'], data.user);
-        if (data.user.role === 'TEACHER') {
-          setLocation('/teacher/dashboard');
-        } else {
-          setLocation('/student/dashboard');
-        }
-      }
+      if (!data?.token || !data?.user) return;
+      setAuthTokenCookie(data.token);
+      queryClient.setQueryData(["auth", "me"], data.user);
+      navigate(data.user.role === "TEACHER" ? "/teacher/dashboard" : "/student/dashboard", {
+        replace: true,
+      });
     },
   });
 
   const register = useMutation({
     mutationFn: async (data: any) => {
-      const res = await api.post('/auth/register', data);
+      const res = await api.post("/auth/register", data);
       return res.data;
     },
     onSuccess: (data) => {
-      if (data.token) {
-        localStorage.setItem('medlearn_token', data.token);
-        queryClient.setQueryData(['auth', 'me'], data.user);
-        if (data.user.role === 'TEACHER') {
-          setLocation('/teacher/dashboard');
-        } else {
-          setLocation('/student/dashboard');
-        }
-      }
+      if (!data?.token || !data?.user) return;
+      setAuthTokenCookie(data.token);
+      queryClient.setQueryData(["auth", "me"], data.user);
+      navigate(data.user.role === "TEACHER" ? "/teacher/dashboard" : "/student/dashboard", {
+        replace: true,
+      });
     },
   });
 
   // FUNÇÃO PARA ENCERRAR A SESSÃO LOCAL DO USUÁRIO
   const logout = () => {
-    localStorage.removeItem('medlearn_token');
-    queryClient.setQueryData(['auth', 'me'], null);
+    clearAuthTokenCookie();
+    queryClient.setQueryData(["auth", "me"], null);
     queryClient.clear();
-    setLocation('/login');
+    navigate("/login", { replace: true });
   };
 
   return {
     user,
     isLoading,
+    error,
     isAuthenticated: !!user,
     login,
     register,

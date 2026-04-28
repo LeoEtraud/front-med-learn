@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { usePublicCourses } from '@/hooks/use-courses';
-import { Link, useLocation } from 'wouter';
+import { Link, useNavigate } from 'react-router-dom';
 import { Search, Clock, GraduationCap, ChevronRight, BookOpen, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,7 +31,7 @@ function formatCourseLevel(level?: string) {
 }
 
 export default function CourseCatalog() {
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [specialty, setSpecialty] = useState('');
   const debouncedSearch = useDebouncedValue(search.trim(), 350);
@@ -44,7 +44,7 @@ export default function CourseCatalog() {
       window.history.back();
       return;
     }
-    setLocation('/');
+    navigate('/');
   };
 
   return (
@@ -142,7 +142,7 @@ export default function CourseCatalog() {
                       <Clock className="w-4 h-4" />
                       {course.workloadHours ? `${course.workloadHours}h` : '--'}
                     </div>
-                    <Link href={`/courses/${course.id}`}>
+                    <Link to={`/courses/${course.id}`}>
                       <Button variant="ghost" className="text-primary hover:text-primary hover:bg-primary/5 p-0 gap-1 h-auto font-semibold">
                         Ver Detalhes <ChevronRight className="w-4 h-4" />
                       </Button>

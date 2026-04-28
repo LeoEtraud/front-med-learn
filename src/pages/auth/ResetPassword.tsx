@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Link, useSearch } from 'wouter';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -24,8 +24,8 @@ type FormValues = z.infer<typeof schema>;
 
 // PÁGINA DE REDEFINIÇÃO DE SENHA - PÁGINA PARA REDEFINIR A SENHA DO USUÁRIO
 export default function ResetPassword() {
-  const search = useSearch();
-  const token = useMemo(() => new URLSearchParams(search).get('token') ?? '', [search]);
+  const [searchParams] = useSearchParams();
+  const token = useMemo(() => searchParams.get('token') ?? '', [searchParams]);
 
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -77,7 +77,7 @@ export default function ResetPassword() {
             {!token ? (
               <div className="p-3 text-sm text-amber-800 bg-amber-50 rounded-md border border-amber-100">
                 Este link não contém um token válido.{' '}
-                <Link href="/forgot-password" className="font-semibold text-primary hover:underline">
+                <Link to="/forgot-password" className="font-semibold text-primary hover:underline">
                   Solicitar novo link
                 </Link>
               </div>
@@ -92,7 +92,7 @@ export default function ResetPassword() {
                   <div className="p-3 text-sm text-green-800 bg-green-50 rounded-md border border-green-100 space-y-3">
                     <p>{successMsg}</p>
                     <Link
-                      href="/login"
+                      to="/login"
                       className="inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-input bg-background text-sm font-medium hover:bg-accent hover:text-accent-foreground touch-manipulation"
                     >
                       Ir para o login
@@ -123,7 +123,7 @@ export default function ResetPassword() {
           </CardContent>
           <CardFooter className="flex flex-col gap-2 pb-8 text-center">
             <p className="text-sm text-slate-600">
-              <Link href="/login" className="text-primary hover:underline font-semibold">
+              <Link to="/login" className="text-primary hover:underline font-semibold">
                 Voltar ao login
               </Link>
             </p>

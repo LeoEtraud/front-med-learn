@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useDeleteCourse, useTeacherCourses } from '@/hooks/use-teacher';
-import { Link } from 'wouter';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Plus, Edit2, Clock3, FileText, Trash2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -165,7 +165,7 @@ export default function CoursesList() {
                   </div>
 
                   <div className="mt-auto flex flex-wrap items-center gap-1.5 pt-1 sm:gap-2">
-                    <Link href={`/teacher/courses/${course.id}/edit`} className="flex-1 min-w-full sm:min-w-[8.5rem]">
+                    <Link to={`/teacher/courses/${course.id}/edit`} className="flex-1 min-w-full sm:min-w-[8.5rem]">
                       <Button
                         variant="default"
                         size="sm"

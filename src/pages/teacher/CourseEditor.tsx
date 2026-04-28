@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useLocation, useParams } from 'wouter';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   useTeacherCourse,
   useUpdateCourse,
@@ -503,7 +503,7 @@ const courseInfoSchema = z.object({
 // PÁGINA DE EDITOR DE CURSO - PÁGINA PARA EDITAR UM CURSO
 export default function CourseEditor() {
   const { id } = useParams<{ id: string }>();
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
   const { data: course, isLoading, isError, error, refetch, isRefetching } = useTeacherCourse(id!);
   const showLoading = useDelayedFlag(isLoading);
   const updateCourse = useUpdateCourse();
@@ -627,7 +627,7 @@ export default function CourseEditor() {
       window.history.back();
       return;
     }
-    setLocation('/teacher/courses');
+    navigate('/teacher/courses');
   };
 
   if (isLoading && !course) {

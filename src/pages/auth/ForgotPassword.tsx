@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'wouter';
+import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -87,7 +87,7 @@ export default function ForgotPassword() {
           </CardContent>
           <CardFooter className="flex flex-col gap-2 pb-8 text-center">
             <p className="text-sm text-slate-600">
-              <Link href="/login" className="text-primary hover:underline font-semibold">
+              <Link to="/login" className="text-primary hover:underline font-semibold">
                 Voltar ao login
               </Link>
             </p>

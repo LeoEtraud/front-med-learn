@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, useLocation } from 'wouter';
+import { useNavigate, useParams } from 'react-router-dom';
 import { usePublicCourse } from '@/hooks/use-courses';
 import { useAuth } from '@/hooks/use-auth';
 import { useEnrollInCourse } from '@/hooks/use-student';
@@ -29,8 +29,9 @@ function formatCourseLevel(level?: string) {
 
 export default function CourseDetail() {
   const { id } = useParams<{id: string}>();
-  const [, setLocation] = useLocation();
-  const { data: course, isLoading } = usePublicCourse(id);
+  const navigate = useNavigate();
+  const courseId = id ?? '';
+  const { data: course, isLoading } = usePublicCourse(courseId);
   const showLoading = useDelayedFlag(isLoading);
   const { user } = useAuth();
   const enroll = useEnrollInCourse();
@@ -41,12 +42,12 @@ export default function CourseDetail() {
       window.history.back();
       return;
     }
-    setLocation('/courses');
+    navigate('/courses');
   };
 
   const handleEnroll = async () => {
     if (!user) {
-      setLocation('/login');
+      navigate('/login');
       return;
     }
     if (user.role !== 'STUDENT') {
@@ -55,17 +56,18 @@ export default function CourseDetail() {
         title: "Apenas alunos podem se inscrever",
         description: "Redirecionando para seu painel.",
       });
-      setLocation(user.role === 'TEACHER' ? '/teacher/dashboard' : '/');
+      navigate(user.role === 'TEACHER' ? '/teacher/dashboard' : '/');
       return;
     }
     try {
-      await enroll.mutateAsync(id);
+      if (!courseId) return;
+      await enroll.mutateAsync(courseId);
       toast({
         variant: "success",
         title: "Inscrição confirmada!",
         description: "Bem-vindo ao curso.",
       });
-      setLocation('/student/courses');
+      navigate('/student/courses');
     } catch (e: any) {
       if (e?.response?.status === 409) {
         toast({
@@ -73,7 +75,7 @@ export default function CourseDetail() {
           title: "Você já está inscrito neste curso",
           description: "Redirecionando para seus cursos.",
         });
-        setLocation('/student/courses');
+        navigate('/student/courses');
         return;
       }
       toast({ variant: "destructive", title: "Erro", description: e.response?.data?.error || "Falha ao se inscrever." });

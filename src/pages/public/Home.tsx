@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'wouter';
+import { Link } from 'react-router-dom';
 import { BookOpen, Award, Users, ArrowRight, ShieldCheck, PlayCircle, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -24,15 +24,15 @@ export default function Home() {
           </div>
 
           <div className="hidden items-center gap-2 md:flex md:gap-4">
-            <Link href="/courses">
+            <Link to="/courses">
               <span className="cursor-pointer text-sm font-medium text-slate-600 hover:text-primary">
                 Catálogo de Cursos
               </span>
             </Link>
-            <Link href="/login">
+            <Link to="/login">
               <Button variant="ghost">Entrar</Button>
             </Link>
-            <Link href="/register">
+            <Link to="/register">
               <Button>Criar Conta</Button>
             </Link>
           </div>
@@ -53,17 +53,17 @@ export default function Home() {
                 <SheetTitle className="font-display">Menu</SheetTitle>
               </SheetHeader>
               <nav className="flex flex-col gap-2">
-                <Link href="/courses" onClick={() => setMobileNavOpen(false)}>
+                <Link to="/courses" onClick={() => setMobileNavOpen(false)}>
                   <span className="block min-h-11 rounded-lg px-3 py-3 text-base font-medium text-slate-700 hover:bg-slate-100 touch-manipulation">
                     Catálogo de Cursos
                   </span>
                 </Link>
-                <Link href="/login" onClick={() => setMobileNavOpen(false)}>
+                <Link to="/login" onClick={() => setMobileNavOpen(false)}>
                   <span className="block min-h-11 rounded-lg px-3 py-3 text-base font-medium text-slate-700 hover:bg-slate-100 touch-manipulation">
                     Entrar
                   </span>
                 </Link>
-                <Link href="/register" onClick={() => setMobileNavOpen(false)}>
+                <Link to="/register" onClick={() => setMobileNavOpen(false)}>
                   <Button className="mt-2 w-full" size="lg">
                     Criar Conta
                   </Button>
@@ -97,12 +97,12 @@ export default function Home() {
             estudantes e profissionais de medicina.
           </p>
           <div className="flex flex-col justify-center gap-3 sm:flex-row sm:gap-4">
-            <Link href="/register" className="w-full sm:w-auto">
+            <Link to="/register" className="w-full sm:w-auto">
               <Button size="lg" className="h-12 w-full gap-2 rounded-xl px-6 text-base shadow-xl shadow-primary/20 sm:h-14 sm:px-8 sm:text-lg">
                 Começar a Estudar <ArrowRight className="h-5 w-5 shrink-0" aria-hidden />
               </Button>
             </Link>
-            <Link href="/courses" className="w-full sm:w-auto">
+            <Link to="/courses" className="w-full sm:w-auto">
               <Button size="lg" variant="outline" className="h-12 w-full rounded-xl px-6 text-base sm:h-14 sm:px-8 sm:text-lg">
                 Explorar Cursos
               </Button>

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
-import { useLocation } from 'wouter';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { BookOpen, FileVideo, GraduationCap, LayoutDashboard } from 'lucide-react';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
@@ -9,7 +9,8 @@ const THEME_KEY = 'medlearn_theme';
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, logout, isLoading } = useAuth();
-  const [location, setLocation] = useLocation();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === 'true');
   const [theme, setTheme] = useState<'light' | 'dark'>(() => (localStorage.getItem(THEME_KEY) === 'dark' ? 'dark' : 'light'));
@@ -30,9 +31,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!isLoading && !user) {
-      setLocation('/login');
+      navigate('/login', { replace: true });
     }
-  }, [isLoading, user, setLocation]);
+  }, [isLoading, navigate, user]);
 
   const isResolvingSession = isLoading && !user;
 
@@ -50,7 +51,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     <div className="flex h-screen bg-background">
       <Sidebar
         links={links}
-        location={location}
+          location={location.pathname}
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
         collapsed={isSidebarCollapsed}
@@ -67,7 +68,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="shrink-0 overflow-visible">
           <Header
             user={user}
-            location={location}
+            location={location.pathname}
             theme={theme}
             onMenuToggle={() => setIsMobileMenuOpen((prev) => !prev)}
             onToggleTheme={() => setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))}

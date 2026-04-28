@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'wouter';
+import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -81,7 +81,7 @@ export default function Login() {
                 <PasswordInput {...register('password')} placeholder="••••••••" className="sm:h-12" />
                 {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
                 <div className="flex justify-end pt-0.5">
-                  <Link href="/forgot-password" className="text-sm text-primary hover:underline font-medium">
+                  <Link to="/forgot-password" className="text-sm text-primary hover:underline font-medium">
                     Esqueci minha senha
                   </Link>
                 </div>
@@ -93,7 +93,7 @@ export default function Login() {
           </CardContent>
           <CardFooter className="flex flex-col gap-2 pt-6 pb-8 text-center">
             <p className="text-sm text-slate-600">
-              Não tem uma conta? <Link href="/register" className="text-primary hover:underline font-semibold">Cadastre-se</Link>
+              Não tem uma conta? <Link to="/register" className="text-primary hover:underline font-semibold">Cadastre-se</Link>
             </p>
           </CardFooter>
         </Card>
