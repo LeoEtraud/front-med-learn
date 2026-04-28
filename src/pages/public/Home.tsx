@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BookOpen, Award, Users, ArrowRight, ShieldCheck, PlayCircle, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';

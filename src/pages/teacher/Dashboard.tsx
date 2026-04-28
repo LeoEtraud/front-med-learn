@@ -1,4 +1,3 @@
-import React from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useTeacherDashboard } from '@/hooks/use-teacher';
 import { Card, CardContent } from '@/components/ui/card';

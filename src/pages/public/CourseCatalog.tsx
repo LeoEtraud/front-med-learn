@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { usePublicCourses } from '@/hooks/use-courses';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, Clock, GraduationCap, ChevronRight, BookOpen, ArrowLeft } from 'lucide-react';

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useDeleteCourse, useTeacherCourses } from '@/hooks/use-teacher';
 import { Link } from 'react-router-dom';

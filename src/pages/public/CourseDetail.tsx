@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { usePublicCourse } from '@/hooks/use-courses';
 import { useAuth } from '@/hooks/use-auth';

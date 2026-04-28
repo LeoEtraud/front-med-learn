@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useStudentLesson, useMarkLessonProgress } from '@/hooks/use-student';
 import { usePublicCourse } from '@/hooks/use-courses';
@@ -168,7 +167,7 @@ export default function LessonViewer() {
               <Button
                 onClick={handleComplete}
                 variant="default"
-                className={`w-full shrink-0 sm:w-auto ${lesson.isCompleted ? '!border-emerald-900 !bg-emerald-800 !text-white hover:!bg-emerald-900 hover:!text-white disabled:!opacity-100 dark:!border-emerald-500/35 dark:!bg-emerald-500/15 dark:!text-emerald-300 dark:hover:!bg-emerald-500/20' : ''}`}
+                className={`w-full shrink-0 sm:w-auto ${lesson.isCompleted ? '!border-green-900 !bg-green-800 !text-white hover:!bg-green-900 hover:!text-white disabled:!opacity-100 dark:!border-green-500/35 dark:!bg-green-500/15 dark:!text-green-300 dark:hover:!bg-green-500/20' : ''}`}
                 isLoading={markProgress.isPending}
                 disabled={isLessonSwitching}
               >
