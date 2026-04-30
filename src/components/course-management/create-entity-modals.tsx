@@ -190,6 +190,7 @@ export function CreateCourseModal({ open, onOpenChange }: CreateCourseModalProps
   });
 
   return (
+    // MODAL PARA CRIAR UM CURSO
     <ModalShell
       open={open}
       onOpenChange={onOpenChange}
@@ -320,6 +321,7 @@ export function CreateCourseModal({ open, onOpenChange }: CreateCourseModalProps
   );
 }
 
+// SCHEMA PARA CRIAR UM MÓDULO
 const moduleSchema = z.object({
   title: z.string().trim().min(1, "Título é obrigatório"),
   description: z.string().trim().optional(),
@@ -328,6 +330,7 @@ const moduleSchema = z.object({
     .optional(),
 });
 
+// PROPS PARA CRIAR UM MÓDULO
 type CreateModuleModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -335,8 +338,10 @@ type CreateModuleModalProps = {
   defaultOrder?: number;
 };
 
+// FORM VALUES PARA CRIAR UM MÓDULO
 type ModuleFormValues = z.infer<typeof moduleSchema>;
 
+// COMPONENTE PARA CRIAR UM MÓDULO
 export function CreateModuleModal({ open, onOpenChange, courseId, defaultOrder }: CreateModuleModalProps) {
   const createModule = useCreateModule();
   const { toast } = useToast();
@@ -371,6 +376,7 @@ export function CreateModuleModal({ open, onOpenChange, courseId, defaultOrder }
   });
 
   return (
+    // MODAL PARA CRIAR UM MÓDULO
     <ModalShell
       open={open}
       onOpenChange={onOpenChange}

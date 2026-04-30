@@ -40,6 +40,7 @@ import { useDelayedFlag } from '@/hooks/use-delayed-flag';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MEDICAL_SPECIALTIES } from '@/lib/medical-specialties';
 import { uploadCourseCoverFile } from '@/lib/course-cover-upload';
+import { cn } from '@/lib/utils';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -601,6 +602,15 @@ export default function CourseEditor() {
   const handleConfirmPublishToggle = async () => {
     if (!course) return;
     const shouldPublish = course.status !== 'PUBLISHED';
+    if (shouldPublish && (course.modules?.length ?? 0) === 0) {
+      toast({
+        variant: 'destructive',
+        title: 'Não é possível publicar',
+        description: 'Adicione pelo menos um módulo ao curso antes de publicar.',
+      });
+      setIsStatusDialogOpen(false);
+      return;
+    }
     try {
       await setCourseStatus.mutateAsync({ id: course.id, status: shouldPublish ? 'PUBLISHED' : 'DRAFT' });
       toast({
@@ -666,6 +676,9 @@ export default function CourseEditor() {
     );
   }
 
+  const hasModules = (course.modules?.length ?? 0) > 0;
+  const publishDisabledWithoutModules = course.status !== 'PUBLISHED' && !hasModules;
+
   return (
     <AppLayout>
       <CreateModuleModal
@@ -713,7 +726,7 @@ export default function CourseEditor() {
                 event.preventDefault();
                 handleConfirmPublishToggle();
               }}
-              disabled={setCourseStatus.isPending}
+              disabled={setCourseStatus.isPending || (course.status !== 'PUBLISHED' && !hasModules)}
             >
               {setCourseStatus.isPending
                 ? 'Processando...'
@@ -743,12 +756,19 @@ export default function CourseEditor() {
             <h1 className="font-display text-xl font-bold sm:text-2xl md:text-3xl">{course.title}</h1>
           </div>
           <Button
-            className={
+            className={cn(
               course.status === 'PUBLISHED'
                 ? 'w-full shrink-0 sm:w-auto bg-purple-600 text-white hover:bg-purple-700 focus-visible:ring-purple-600 border-transparent'
-                : 'w-full shrink-0 sm:w-auto bg-emerald-600 text-white hover:bg-emerald-700 focus-visible:ring-emerald-600 border-transparent'
-            }
+                : 'w-full shrink-0 sm:w-auto bg-emerald-600 text-white hover:bg-emerald-700 focus-visible:ring-emerald-600 border-transparent',
+              publishDisabledWithoutModules && 'cursor-not-allowed !pointer-events-auto',
+            )}
             isLoading={setCourseStatus.isPending}
+            disabled={publishDisabledWithoutModules}
+            title={
+              publishDisabledWithoutModules
+                ? 'Adicione pelo menos um módulo para publicar o curso.'
+                : undefined
+            }
             onClick={() => setIsStatusDialogOpen(true)}
           >
             <BookCheck className="mr-2 h-4 w-4" />

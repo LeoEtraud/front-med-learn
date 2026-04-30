@@ -14,17 +14,21 @@ import { getAuthTokenFromCookie } from "@/lib/auth-cookie";
 
 const CHAT_ID = "medlearn-assistant";
 
+// TIPO DE VALOR DO CONTEXTO DE CHAT DO MEDLEARN AI
 type MedlearnAiChatContextValue = UseChatHelpers<UIMessage>;
 
+// CONTEXTO DE CHAT DO MEDLEARN AI
 const MedlearnAiChatContext = createContext<MedlearnAiChatContextValue | null>(
   null,
 );
 
+// PROPS PARA O FORNECEDOR DE CONTEXTO DE CHAT DO MEDLEARN AI
 type MedlearnAiChatProviderProps = {
   children: ReactNode;
   apiEndpoint?: string;
 };
 
+// FUNÇÃO PARA FORNECER O CONTEXTO DE CHAT DO MEDLEARN AI
 export function MedlearnAiChatProvider({
   children,
   apiEndpoint = "/api/chat",
@@ -53,8 +57,9 @@ export function MedlearnAiChatProvider({
 
   const { setMessages } = chat;
 
-  const prevHadUser = useRef(false);
+  const prevHadUser = useRef(false);  
 
+  // FUNÇÃO PARA LIMPAR AS MENSAGENS DO CHAT QUANDO O USUÁRIO MUDA
   useEffect(() => {
     if (user) {
       prevHadUser.current = true;
@@ -73,6 +78,7 @@ export function MedlearnAiChatProvider({
   );
 }
 
+// FUNÇÃO PARA USAR O CONTEXTO DE CHAT DO MEDLEARN AI
 export function useMedlearnAiChat() {
   const ctx = useContext(MedlearnAiChatContext);
   if (!ctx) {

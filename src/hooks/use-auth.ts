@@ -13,7 +13,7 @@ export function useAuth() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const hasToken = hasAuthTokenCookie();
-
+  // FUNÇÃO PARA CONSULTAR O PERFIL DO USUÁRIO AUTENTICADO
   const { data: user, isLoading, error } = useQuery({
     queryKey: ["auth", "me"],
     queryFn: async () => {
@@ -32,6 +32,7 @@ export function useAuth() {
     placeholderData: (previousData) => previousData,
   });
 
+  // FUNÇÃO PARA FAZER LOGIN
   const login = useMutation({
     mutationFn: async (credentials: any) => {
       const res = await api.post("/auth/login", credentials);
@@ -47,6 +48,7 @@ export function useAuth() {
     },
   });
 
+  // FUNÇÃO PARA REGISTRAR UM NOVO USUÁRIO
   const register = useMutation({
     mutationFn: async (data: any) => {
       const res = await api.post("/auth/register", data);

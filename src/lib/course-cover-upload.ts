@@ -1,6 +1,7 @@
 const MAX_COVER_BYTES = 3 * 1024 * 1024;
 const ALLOWED_COVER_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
 
+// FUNÇÃO PARA CONVERTER UM ARQUIVO EM DATA URL
 function fileToDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -16,6 +17,7 @@ function fileToDataUrl(file: File): Promise<string> {
   });
 }
 
+// FUNÇÃO PARA UPLOADAR UM ARQUIVO DE COBERTURA DE CURSO
 export async function uploadCourseCoverFile(file: File): Promise<string> {
   const contentType = (file.type || 'image/jpeg').toLowerCase();
   if (!ALLOWED_COVER_TYPES.has(contentType)) {

@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { clearAuthTokenCookie, getAuthTokenFromCookie } from '@/lib/auth-cookie';
-
+  
 /** Em dev, o Vite faz proxy de `/api` → `VITE_API_ORIGIN`. Em produção (Vercel), use `VITE_API_ORIGIN` com a URL do backend (ex.: https://seu-app.onrender.com). */
 function getApiBaseUrl(): string {
   if (import.meta.env.DEV) {
@@ -25,7 +25,7 @@ export function resolveApiUrl(path: string): string {
   return path;
 }
 
-// Create a custom axios instance to reliably inject the token
+// CRIAR UMA INSTÂNCIA DE AXIOS PARA INJETAR O TOKEN DE FORMA RELIÁVEL
 export const api = axios.create({
   baseURL: getApiBaseUrl(),
   withCredentials: true,
@@ -34,6 +34,7 @@ export const api = axios.create({
   },
 });
 
+// INTERCEPTOR PARA INJETAR O TOKEN DE FORMA RELIÁVEL
 api.interceptors.request.use((config) => {
   const token = getAuthTokenFromCookie();
   if (token) {
@@ -45,10 +46,10 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Global 401 handler
+    // MANEIRA GLOBAL PARA MANIPULAR O STATUS 401
     if (error.response?.status === 401) {
       clearAuthTokenCookie();
-      // Only redirect if we're not already on a public auth page
+      // REDIRECIONAR APENAS SE NÃO ESTIVER EM UMA PÁGINA DE AUTENTICAÇÃO PÚBLICA
       if (!window.location.pathname.match(/^\/(login|register|forgot-password|reset-password)$/)) {
         window.location.href = '/login';
       }

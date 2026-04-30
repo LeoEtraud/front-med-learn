@@ -1,5 +1,6 @@
 const ONLY_DIGITS = /\D/g;
 
+// FUNÇÃO PARA FORMATAR UM TELEFONE EM BRASIL
 export function formatPhoneBR(value: string): string {
   const digits = value.replace(ONLY_DIGITS, "").slice(0, 11);
   if (!digits) return "";
@@ -11,11 +12,13 @@ export function formatPhoneBR(value: string): string {
   return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
 }
 
+// FUNÇÃO PARA VALIDAR UM TELEFONE EM BRASIL
 export function isValidPhoneBR(value: string): boolean {
   if (!value.trim()) return true;
   return /^\(\d{2}\)\s\d{4,5}-\d{4}$/.test(value);
 }
 
+// FUNÇÃO PARA FORMATAR UM CPF
 export function formatCpf(value: string): string {
   const digits = value.replace(ONLY_DIGITS, "").slice(0, 11);
   if (digits.length <= 3) return digits;
@@ -24,6 +27,7 @@ export function formatCpf(value: string): string {
   return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
 }
 
+// FUNÇÃO PARA VALIDAR UM CPF
 function isCpfChecksumValid(cpfDigits: string): boolean {
   if (!/^\d{11}$/.test(cpfDigits)) return false;
   if (/^(\d)\1{10}$/.test(cpfDigits)) return false;
@@ -39,6 +43,7 @@ function isCpfChecksumValid(cpfDigits: string): boolean {
   return firstDigit === Number(cpfDigits[9]) && secondDigit === Number(cpfDigits[10]);
 }
 
+// FUNÇÃO PARA VALIDAR UM CPF
 export function isValidCpf(value: string): boolean {
   if (!value.trim()) return true;
   if (!/^\d{3}\.\d{3}\.\d{3}-\d{2}$/.test(value)) return false;
