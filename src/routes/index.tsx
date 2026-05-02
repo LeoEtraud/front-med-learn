@@ -15,6 +15,7 @@ import CourseEditor from "@/pages/teacher/CourseEditor";
 import CoursesList from "@/pages/teacher/CoursesList";
 import TeacherDashboard from "@/pages/teacher/Dashboard";
 import TeacherProfile from "@/pages/teacher/Profile";
+import UserManagement from "@/pages/teacher/UserManagement";
 import { PrivateRoute } from "./privateRoute";
 
 export function AppRoutes() {
@@ -43,6 +44,7 @@ export function AppRoutes() {
         <Route path="/teacher/courses" element={<CoursesList />} />
         <Route path="/teacher/courses/:id/edit" element={<CourseEditor />} />
         <Route path="/teacher/profile" element={<TeacherProfile />} />
+        <Route path="/teacher/users" element={<UserManagement />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />

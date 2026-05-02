@@ -48,19 +48,11 @@ export function useAuth() {
     },
   });
 
-  // FUNÇÃO PARA REGISTRAR UM NOVO USUÁRIO
+  // FUNÇÃO PARA REGISTRAR UM NOVO USUÁRIO (retorna apenas mensagem; sem login automático)
   const register = useMutation({
     mutationFn: async (data: any) => {
       const res = await api.post("/auth/register", data);
-      return res.data;
-    },
-    onSuccess: (data) => {
-      if (!data?.token || !data?.user) return;
-      setAuthTokenCookie(data.token);
-      queryClient.setQueryData(["auth", "me"], data.user);
-      navigate(data.user.role === "TEACHER" ? "/teacher/dashboard" : "/student/dashboard", {
-        replace: true,
-      });
+      return res.data as { message: string };
     },
   });
 

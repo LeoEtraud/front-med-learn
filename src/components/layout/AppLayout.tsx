@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { BookOpen, FileVideo, GraduationCap, LayoutDashboard } from 'lucide-react';
+import { BookOpen, FileVideo, GraduationCap, LayoutDashboard, Users } from 'lucide-react';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 const SIDEBAR_COLLAPSED_KEY = 'medlearn_sidebar_collapsed';
@@ -22,6 +22,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const teacherLinks = useMemo(() => [
     { href: '/teacher/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/teacher/courses', label: 'Gerenciar Cursos', icon: FileVideo },
+    { href: '/teacher/users', label: 'Gestão de Usuários', icon: Users },
   ], []);
 
   useEffect(() => {

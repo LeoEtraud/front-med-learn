@@ -1,5 +1,15 @@
 const ONLY_DIGITS = /\D/g;
 
+/** Comprimento máximo do valor exibido com máscara de CPF (`000.000.000-00`). */
+export const CPF_MASK_MAX_LENGTH = 14;
+
+/** Comprimento máximo do telefone BR mascarado `(11) 98765-4321`. */
+export const PHONE_BR_MASK_MAX_LENGTH = 15;
+
+export function digitsOnly(value: string): string {
+  return value.replace(ONLY_DIGITS, "");
+}
+
 // FUNÇÃO PARA FORMATAR UM TELEFONE EM BRASIL
 export function formatPhoneBR(value: string): string {
   const digits = value.replace(ONLY_DIGITS, "").slice(0, 11);
@@ -12,9 +22,15 @@ export function formatPhoneBR(value: string): string {
   return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
 }
 
+export type BrContactValidityOpts = {
+  /** Se `true`, string vazia ou só espaços é considerada válida (perfil: campos opcionais). Padrão: `true`. */
+  allowEmpty?: boolean;
+};
+
 // FUNÇÃO PARA VALIDAR UM TELEFONE EM BRASIL
-export function isValidPhoneBR(value: string): boolean {
-  if (!value.trim()) return true;
+export function isValidPhoneBR(value: string, opts?: BrContactValidityOpts): boolean {
+  const allowEmpty = opts?.allowEmpty ?? true;
+  if (!value.trim()) return allowEmpty;
   return /^\(\d{2}\)\s\d{4,5}-\d{4}$/.test(value);
 }
 
@@ -44,8 +60,9 @@ function isCpfChecksumValid(cpfDigits: string): boolean {
 }
 
 // FUNÇÃO PARA VALIDAR UM CPF
-export function isValidCpf(value: string): boolean {
-  if (!value.trim()) return true;
+export function isValidCpf(value: string, opts?: BrContactValidityOpts): boolean {
+  const allowEmpty = opts?.allowEmpty ?? true;
+  if (!value.trim()) return allowEmpty;
   if (!/^\d{3}\.\d{3}\.\d{3}-\d{2}$/.test(value)) return false;
   return isCpfChecksumValid(value.replace(ONLY_DIGITS, ""));
 }

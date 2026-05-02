@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -8,33 +8,55 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/ui/password-input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { BookOpen, Stethoscope } from 'lucide-react';
+import { BookOpen, Stethoscope, CheckCircle2, Clock } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
-// ESQUEMA DE VALIDAÇÃO PARA O LOGIN
 const loginSchema = z.object({
   email: z.string().email('Email inválido'),
   password: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres'),
 });
 
-// TIPO PARA O FORMULÁRIO DE LOGIN
 type LoginForm = z.infer<typeof loginSchema>;
 
-// PÁGINA DE LOGIN - PÁGINA PARA FAZER LOGIN NO USUÁRIO
 export default function Login() {
   const { login } = useAuth();
+  const location = useLocation();
+  const { toast } = useToast();
   const [errorMsg, setErrorMsg] = useState('');
-  
+  const [isPending, setIsPending] = useState(false);
+
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginForm>({
-    resolver: zodResolver(loginSchema)
+    resolver: zodResolver(loginSchema),
   });
 
-  // FUNÇÃO PARA SUBMITIR O FORMULÁRIO DE LOGIN
+  useEffect(() => {
+    const state = location.state as { registrationSuccess?: boolean } | null;
+    if (state?.registrationSuccess) {
+      toast({
+        title: 'Cadastro realizado com sucesso!',
+        description:
+          'Após a confirmação do pagamento, o coordenador do curso irá habilitar seu acesso. Você receberá um e-mail para criar sua senha e acessar a plataforma.',
+        duration: 12000,
+      });
+      // limpa o estado para não reexibir ao recarregar
+      window.history.replaceState({}, '');
+    }
+  }, []);
+
   const onSubmit = async (data: LoginForm) => {
     try {
       setErrorMsg('');
+      setIsPending(false);
       await login.mutateAsync(data);
-    } catch (error: any) {
-      setErrorMsg(error.response?.data?.error || 'Erro ao fazer login. Verifique suas credenciais.');
+    } catch (error: unknown) {
+      const response = (error as { response?: { data?: { error?: string; code?: string } } })?.response;
+      if (response?.data?.code === 'ACCOUNT_PENDING') {
+        setIsPending(true);
+        setErrorMsg('');
+      } else {
+        setIsPending(false);
+        setErrorMsg(response?.data?.error || 'Erro ao fazer login. Verifique suas credenciais.');
+      }
     }
   };
 
@@ -52,7 +74,7 @@ export default function Login() {
           <p className="text-lg text-slate-300">Acesse seus cursos, continue seu aprendizado e expanda seus conhecimentos médicos.</p>
         </div>
       </div>
-      
+
       <div className="flex min-w-0 items-center justify-center p-4 sm:p-6">
         <Card className="w-full max-w-md border-slate-200 shadow-xl">
           <CardHeader className="space-y-2 pt-6 text-center sm:pt-8">
@@ -66,6 +88,15 @@ export default function Login() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              {isPending && (
+                <div className="flex gap-3 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+                  <Clock className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+                  <p>
+                    Sua conta está <strong>aguardando habilitação</strong>. Após a confirmação do pagamento, o
+                    coordenador irá liberar seu acesso e você receberá um e-mail para criar sua senha.
+                  </p>
+                </div>
+              )}
               {errorMsg && (
                 <div className="p-3 text-sm text-red-600 bg-red-50 rounded-md border border-red-100">
                   {errorMsg}

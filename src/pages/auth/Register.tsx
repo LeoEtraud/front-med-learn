@@ -1,45 +1,100 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { PasswordInput } from '@/components/ui/password-input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { BookOpen, Stethoscope } from 'lucide-react';
+import {
+  CPF_MASK_MAX_LENGTH,
+  PHONE_BR_MASK_MAX_LENGTH,
+  digitsOnly,
+  formatCpf,
+  formatPhoneBR,
+  isValidCpf,
+  isValidPhoneBR,
+} from '@/lib/profile-formatters';
+import { RecaptchaWidget, getRecaptchaSiteKey } from '@/components/auth/RecaptchaWidget';
 
-// ESQUEMA DE VALIDAÇÃO PARA O REGISTRO
 const registerSchema = z.object({
   name: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres'),
   email: z.string().email('Email inválido'),
-  password: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres'),
+  cpf: z
+    .string()
+    .min(1, 'CPF é obrigatório')
+    .max(CPF_MASK_MAX_LENGTH, `CPF pode ter no máximo ${CPF_MASK_MAX_LENGTH} caracteres`)
+    .refine((v) => isValidCpf(v, { allowEmpty: false }), 'CPF inválido')
+    .transform(digitsOnly),
+  phone: z
+    .string()
+    .min(1, 'Telefone é obrigatório')
+    .max(PHONE_BR_MASK_MAX_LENGTH, `Telefone pode ter no máximo ${PHONE_BR_MASK_MAX_LENGTH} caracteres`)
+    .refine((v) => isValidPhoneBR(v, { allowEmpty: false }), 'Informe um telefone válido com DDD (mesmo formato do perfil).')
+    .transform(digitsOnly),
   role: z.enum(['STUDENT', 'TEACHER']),
 });
 
-// TIPO PARA O FORMULÁRIO DE REGISTRO
 type RegisterForm = z.infer<typeof registerSchema>;
 
-// PÁGINA DE REGISTRO - PÁGINA PARA REGISTRAR UM NOVO USUÁRIO
 export default function Register() {
   const { register: registerUser } = useAuth();
+  const navigate = useNavigate();
   const [errorMsg, setErrorMsg] = useState('');
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
+  const [recaptchaMountKey, setRecaptchaMountKey] = useState(0);
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<RegisterForm>({
+  const hasRecaptchaSiteKey = Boolean(getRecaptchaSiteKey());
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting, isValid },
+  } = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { role: 'STUDENT' },
+    mode: 'onChange',
+    defaultValues: { role: 'STUDENT', name: '', email: '', cpf: '', phone: '' },
   });
 
-  // FUNÇÃO PARA SUBMITIR O FORMULÁRIO DE REGISTRO
+  const cpfRegister = register('cpf', { maxLength: CPF_MASK_MAX_LENGTH });
+  const phoneRegister = register('phone', { maxLength: PHONE_BR_MASK_MAX_LENGTH });
+
   const onSubmit = async (data: RegisterForm) => {
+    if (!hasRecaptchaSiteKey) {
+      setErrorMsg('reCAPTCHA não está configurado neste ambiente.');
+      return;
+    }
+    if (!recaptchaToken) {
+      setErrorMsg('Marque a caixa do reCAPTCHA antes de enviar.');
+      return;
+    }
+
     try {
       setErrorMsg('');
-      await registerUser.mutateAsync(data);
-    } catch (error: any) {
-      setErrorMsg(error.response?.data?.error || 'Erro ao criar conta.');
+      await registerUser.mutateAsync({
+        name: data.name,
+        email: data.email,
+        role: data.role,
+        cpf: data.cpf,
+        phone: data.phone,
+        recaptchaToken,
+      });
+      navigate('/login', {
+        replace: true,
+        state: { registrationSuccess: true },
+      });
+    } catch (error: unknown) {
+      const msg =
+        (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Erro ao criar conta.';
+      setErrorMsg(msg);
+      setRecaptchaToken(null);
+      setRecaptchaMountKey((k) => k + 1);
     }
   };
+
+  const submitBlocked = !isValid || !recaptchaToken || !hasRecaptchaSiteKey;
 
   return (
     <div className="grid min-h-dvh overflow-x-hidden bg-slate-50 md:grid-cols-2">
@@ -65,7 +120,10 @@ export default function Register() {
               </div>
             </div>
             <CardTitle className="font-display text-2xl font-bold sm:text-3xl">Criar conta</CardTitle>
-            <CardDescription>Junte-se à plataforma de educação médica</CardDescription>
+            <CardDescription>
+              Junte-se à plataforma de educação médica. Após o cadastro, enviaremos um e-mail para você definir sua
+              senha de acesso.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -76,18 +134,45 @@ export default function Register() {
               )}
               <div className="space-y-2">
                 <label className="text-sm font-medium">Nome completo</label>
-                <Input {...register('name')} placeholder="Dra. Ana Silva" className="sm:h-12" />
+                <Input {...register('name')} placeholder="Dra. Ana Silva" className="sm:h-12" autoComplete="name" />
                 {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Email</label>
-                <Input type="email" {...register('email')} placeholder="dr.nome@exemplo.com" className="sm:h-12" />
+                <Input type="email" {...register('email')} placeholder="dr.nome@exemplo.com" className="sm:h-12" autoComplete="email" />
                 {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Senha</label>
-                <PasswordInput {...register('password')} placeholder="••••••••" className="sm:h-12" />
-                {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
+                <label className="text-sm font-medium">CPF</label>
+                <Input
+                  {...cpfRegister}
+                  placeholder="000.000.000-00"
+                  className="sm:h-12"
+                  inputMode="numeric"
+                  autoComplete="off"
+                  title="Mesma máscara do perfil: até 11 dígitos (000.000.000-00)"
+                  onChange={(e) => {
+                    e.target.value = formatCpf(e.target.value);
+                    cpfRegister.onChange(e);
+                  }}
+                />
+                {errors.cpf && <p className="text-xs text-red-500">{errors.cpf.message}</p>}
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Telefone</label>
+                <Input
+                  {...phoneRegister}
+                  placeholder="(11) 98765-4321"
+                  className="sm:h-12"
+                  inputMode="tel"
+                  autoComplete="tel"
+                  title="Mesma máscara do perfil: (DD) número com hífen"
+                  onChange={(e) => {
+                    e.target.value = formatPhoneBR(e.target.value);
+                    phoneRegister.onChange(e);
+                  }}
+                />
+                {errors.phone && <p className="text-xs text-red-500">{errors.phone.message}</p>}
               </div>
               <div className="space-y-2 pb-2">
                 <label className="text-sm font-medium">Eu sou um...</label>
@@ -95,11 +180,19 @@ export default function Register() {
                   {...register('role')}
                   className="flex h-11 min-h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-12 sm:text-sm touch-manipulation"
                 >
-                  <option value="STUDENT">Estudante / Médico residente</option>
-                  <option value="TEACHER">Professor / Criador de curso</option>
+                  <option value="STUDENT">Estudante</option>
+                  <option value="TEACHER">Professor / Coordenador</option>
                 </select>
               </div>
-              <Button type="submit" className="w-full text-base sm:h-12 sm:text-lg" isLoading={isSubmitting}>
+              <div className="space-y-2">
+                <RecaptchaWidget key={recaptchaMountKey} onChange={setRecaptchaToken} />
+              </div>
+              <Button
+                type="submit"
+                className="w-full text-base sm:h-12 sm:text-lg"
+                isLoading={isSubmitting}
+                disabled={submitBlocked}
+              >
                 Cadastrar na plataforma
               </Button>
             </form>

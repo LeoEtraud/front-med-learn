@@ -1,15 +1,30 @@
 // Core types inferred from OpenAPI spec to ensure self-contained stability 
 export type Role = 'STUDENT' | 'TEACHER';
 
+export type UserStatus = 'PENDING' | 'ACTIVE';
+
 // INTERFACE PARA O PERFIL DO USUÁRIO
 export interface UserProfile {
   id: string;
   name: string;
   email: string;
   role: Role;
+  status: UserStatus;
   avatarUrl?: string | null;
   bio?: string | null;
   specialty?: string | null;
+  phone?: string | null;
+  cpf?: string | null;
+  createdAt: string;
+}
+
+// INTERFACE PARA USUÁRIO NO PAINEL DO COORDENADOR
+export interface ManagedUser {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+  status: UserStatus;
   phone?: string | null;
   cpf?: string | null;
   createdAt: string;
