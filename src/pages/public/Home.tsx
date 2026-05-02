@@ -24,11 +24,6 @@ export default function Home() {
           </div>
 
           <div className="hidden items-center gap-2 md:flex md:gap-4">
-            <Link to="/courses">
-              <span className="cursor-pointer text-sm font-medium text-slate-600 hover:text-primary">
-                Catálogo de Cursos
-              </span>
-            </Link>
             <Link to="/login">
               <Button variant="ghost">Entrar</Button>
             </Link>
@@ -53,11 +48,6 @@ export default function Home() {
                 <SheetTitle className="font-display">Menu</SheetTitle>
               </SheetHeader>
               <nav className="flex flex-col gap-2">
-                <Link to="/courses" onClick={() => setMobileNavOpen(false)}>
-                  <span className="block min-h-11 rounded-lg px-3 py-3 text-base font-medium text-slate-700 hover:bg-slate-100 touch-manipulation">
-                    Catálogo de Cursos
-                  </span>
-                </Link>
                 <Link to="/login" onClick={() => setMobileNavOpen(false)}>
                   <span className="block min-h-11 rounded-lg px-3 py-3 text-base font-medium text-slate-700 hover:bg-slate-100 touch-manipulation">
                     Entrar
@@ -102,9 +92,9 @@ export default function Home() {
                 Começar a Estudar <ArrowRight className="h-5 w-5 shrink-0" aria-hidden />
               </Button>
             </Link>
-            <Link to="/courses" className="w-full sm:w-auto">
+            <Link to="/login" className="w-full sm:w-auto">
               <Button size="lg" variant="outline" className="h-12 w-full rounded-xl px-6 text-base sm:h-14 sm:px-8 sm:text-lg">
-                Explorar Cursos
+                Entrar
               </Button>
             </Link>
           </div>

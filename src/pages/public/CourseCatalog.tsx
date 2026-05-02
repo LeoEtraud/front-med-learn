@@ -44,7 +44,7 @@ export default function CourseCatalog() {
       window.history.back();
       return;
     }
-    navigate('/');
+    navigate('/student/dashboard');
   };
 
   return (

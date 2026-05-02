@@ -26,11 +26,11 @@ export function AppRoutes() {
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/courses" element={<CourseCatalog />} />
-      <Route path="/courses/:id" element={<CourseDetail />} />
 
       {/* Student */}
       <Route element={<PrivateRoute allowedRoles={["STUDENT"]} />}>
+        <Route path="/courses" element={<CourseCatalog />} />
+        <Route path="/courses/:id" element={<CourseDetail />} />
         <Route path="/student/dashboard" element={<StudentDashboard />} />
         <Route path="/student/courses" element={<StudentCourses />} />
         <Route path="/student/profile" element={<StudentProfile />} />
